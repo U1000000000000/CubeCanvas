@@ -28,7 +28,9 @@ export function Cubie({ cubie }: CubieProps) {
       return new THREE.MeshLambertMaterial({ 
         color: colorValue,
         transparent: false,
-        opacity: 1
+        opacity: 1,
+        side: THREE.FrontSide,
+        needsUpdate: true
       });
     });
   }, [materials]);
@@ -40,6 +42,8 @@ export function Cubie({ cubie }: CubieProps) {
       castShadow
       receiveShadow
       material={faceMaterials}
+      visible={true}
+      frustumCulled={false}
     >
       <boxGeometry args={[0.98, 0.98, 0.98]} />
     </mesh>

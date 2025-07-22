@@ -6,37 +6,38 @@ export function rotateMaterialsClockwise(
   materials: CubeColor[],
   clockwise: boolean = true
 ): CubeColor[] {
-  const newMaterials = [...materials];
+  // Create a deep copy to prevent mutation
+  const newMaterials: CubeColor[] = materials.map(color => color);
   
   if (axis === 'x') {
     // Rotating around X-axis affects Y and Z faces
     // Materials order: [+X, -X, +Y, -Y, +Z, -Z]
     if (clockwise) {
-      // +Y -> -Z, -Z -> -Y, -Y -> +Z, +Z -> +Y
-      const temp = newMaterials[2]; // +Y
-      newMaterials[2] = newMaterials[4]; // +Z -> +Y
-      newMaterials[4] = newMaterials[3]; // -Y -> +Z
-      newMaterials[3] = newMaterials[5]; // -Z -> -Y
-      newMaterials[5] = temp; // +Y -> -Z
-    } else {
-      // Reverse rotation
+      // Clockwise rotation around X: +Y -> +Z -> -Y -> -Z -> +Y
       const temp = newMaterials[2]; // +Y
       newMaterials[2] = newMaterials[5]; // -Z -> +Y
       newMaterials[5] = newMaterials[3]; // -Y -> -Z
       newMaterials[3] = newMaterials[4]; // +Z -> -Y
       newMaterials[4] = temp; // +Y -> +Z
+    } else {
+      // Counter-clockwise rotation around X: +Y -> -Z -> -Y -> +Z -> +Y
+      const temp = newMaterials[2]; // +Y
+      newMaterials[2] = newMaterials[4]; // +Z -> +Y
+      newMaterials[4] = newMaterials[3]; // -Y -> +Z
+      newMaterials[3] = newMaterials[5]; // -Z -> -Y
+      newMaterials[5] = temp; // +Y -> -Z
     }
   } else if (axis === 'y') {
     // Rotating around Y-axis affects X and Z faces
     if (clockwise) {
-      // +X -> -Z, -Z -> -X, -X -> +Z, +Z -> +X
+      // Clockwise rotation around Y: +X -> +Z -> -X -> -Z -> +X
       const temp = newMaterials[0]; // +X
       newMaterials[0] = newMaterials[4]; // +Z -> +X
       newMaterials[4] = newMaterials[1]; // -X -> +Z
       newMaterials[1] = newMaterials[5]; // -Z -> -X
       newMaterials[5] = temp; // +X -> -Z
     } else {
-      // Reverse rotation
+      // Counter-clockwise rotation around Y: +X -> -Z -> -X -> +Z -> +X
       const temp = newMaterials[0]; // +X
       newMaterials[0] = newMaterials[5]; // -Z -> +X
       newMaterials[5] = newMaterials[1]; // -X -> -Z
@@ -46,14 +47,14 @@ export function rotateMaterialsClockwise(
   } else if (axis === 'z') {
     // Rotating around Z-axis affects X and Y faces
     if (clockwise) {
-      // +X -> +Y, +Y -> -X, -X -> -Y, -Y -> +X
+      // Clockwise rotation around Z: +X -> +Y -> -X -> -Y -> +X
       const temp = newMaterials[0]; // +X
       newMaterials[0] = newMaterials[3]; // -Y -> +X
       newMaterials[3] = newMaterials[1]; // -X -> -Y
       newMaterials[1] = newMaterials[2]; // +Y -> -X
       newMaterials[2] = temp; // +X -> +Y
     } else {
-      // Reverse rotation
+      // Counter-clockwise rotation around Z: +X -> -Y -> -X -> +Y -> +X
       const temp = newMaterials[0]; // +X
       newMaterials[0] = newMaterials[2]; // +Y -> +X
       newMaterials[2] = newMaterials[1]; // -X -> +Y

@@ -131,6 +131,8 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
     const axis = getFaceRotationAxis(face);
     const rotatingCubies = getCubiesOnFace(state.cubies, face);
     
+    console.log(`Updating ${rotatingCubies.length} cubies for face ${face}`);
+    
     const updatedCubies = state.cubies.map(cubie => {
       const isRotating = rotatingCubies.some(rc => rc.id === cubie.id);
       if (!isRotating) return cubie;
@@ -139,7 +141,9 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
       const newPosition = rotatePosition(cubie.position, axis, clockwise);
       
       // Update materials
-      const newMaterials = rotateMaterialsClockwise(axis, [...cubie.materials], clockwise);
+      const newMaterials = rotateMaterialsClockwise(axis, cubie.materials, clockwise);
+      
+      console.log(`Cubie ${cubie.id}: ${cubie.materials.join(',')} -> ${newMaterials.join(',')}`);
       
       return {
         ...cubie,
@@ -148,6 +152,9 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
         id: `${newPosition.x},${newPosition.y},${newPosition.z}`
       };
     });
+    
+    // Verify we still have 27 cubies
+    console.log(`Total cubies after update: ${updatedCubies.length}`);
     
     set({
       cubies: updatedCubies,

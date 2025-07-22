@@ -80,28 +80,41 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
 
   // Force re-render when materials change
   const materialKey = React.useMemo(() => {
-    return materials.join('-');
+    return `${cubie.id}-${materials.join('-')}`;
   }, [materials]);
 
   // Create materials for each face with proper error handling
   const faceMaterials = React.useMemo(() => {
-    return materials.map((color, index) => {
+    return materials.map((color) => {
       const colorValue = COLOR_MAP[color as keyof typeof COLOR_MAP] || COLOR_MAP.black;
       return new THREE.MeshLambertMaterial({ 
         color: colorValue,
         transparent: false,
         opacity: 1,
-        side: THREE.FrontSide
+        side: THREE.FrontSide,
+        needsUpdate: true
       });
     });
-  }, [materialKey]);
+  }, [materials, cubie.id]);
 
-  // Force re-render when cubie data changes
+  // Update materials when they change
   React.useEffect(() => {
     if (meshRef.current) {
       meshRef.current.material = faceMaterials;
+      // Force geometry update
+      if (meshRef.current.geometry) {
+        meshRef.current.geometry.computeBoundingBox();
+      }
     }
   }, [faceMaterials]);
+
+  // Ensure cubie is always visible
+  React.useEffect(() => {
+    if (meshRef.current) {
+      meshRef.current.visible = true;
+      meshRef.current.frustumCulled = false; // Prevent culling issues
+    }
+  }, []);
 
   return (
     <mesh
@@ -110,7 +123,8 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
       castShadow
       receiveShadow
       material={faceMaterials}
-      key={`${cubie.id}-${materialKey}`}
+      visible={true}
+      frustumCulled={false}
     >
       <boxGeometry args={[0.98, 0.98, 0.98]} />
     </mesh>

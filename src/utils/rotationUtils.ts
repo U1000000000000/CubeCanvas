@@ -10,37 +10,38 @@ export function rotateMaterialsClockwise(
   
   if (axis === 'x') {
     // Rotating around X-axis affects Y and Z faces
+    // Materials order: [+X, -X, +Y, -Y, +Z, -Z]
     if (clockwise) {
-      // +Y -> +Z, +Z -> -Y, -Y -> -Z, -Z -> +Y
-      const temp = newMaterials[2]; // +Y
-      newMaterials[2] = newMaterials[5]; // -Z -> +Y
-      newMaterials[5] = newMaterials[3]; // -Y -> -Z
-      newMaterials[3] = newMaterials[4]; // +Z -> -Y
-      newMaterials[4] = temp; // +Y -> +Z
-    } else {
-      // Reverse rotation
+      // +Y -> -Z, -Z -> -Y, -Y -> +Z, +Z -> +Y
       const temp = newMaterials[2]; // +Y
       newMaterials[2] = newMaterials[4]; // +Z -> +Y
       newMaterials[4] = newMaterials[3]; // -Y -> +Z
       newMaterials[3] = newMaterials[5]; // -Z -> -Y
       newMaterials[5] = temp; // +Y -> -Z
+    } else {
+      // Reverse rotation
+      const temp = newMaterials[2]; // +Y
+      newMaterials[2] = newMaterials[5]; // -Z -> +Y
+      newMaterials[5] = newMaterials[3]; // -Y -> -Z
+      newMaterials[3] = newMaterials[4]; // +Z -> -Y
+      newMaterials[4] = temp; // +Y -> +Z
     }
   } else if (axis === 'y') {
     // Rotating around Y-axis affects X and Z faces
     if (clockwise) {
-      // +X -> +Z, +Z -> -X, -X -> -Z, -Z -> +X
-      const temp = newMaterials[0]; // +X
-      newMaterials[0] = newMaterials[5]; // -Z -> +X
-      newMaterials[5] = newMaterials[1]; // -X -> -Z
-      newMaterials[1] = newMaterials[4]; // +Z -> -X
-      newMaterials[4] = temp; // +X -> +Z
-    } else {
-      // Reverse rotation
+      // +X -> -Z, -Z -> -X, -X -> +Z, +Z -> +X
       const temp = newMaterials[0]; // +X
       newMaterials[0] = newMaterials[4]; // +Z -> +X
       newMaterials[4] = newMaterials[1]; // -X -> +Z
       newMaterials[1] = newMaterials[5]; // -Z -> -X
       newMaterials[5] = temp; // +X -> -Z
+    } else {
+      // Reverse rotation
+      const temp = newMaterials[0]; // +X
+      newMaterials[0] = newMaterials[5]; // -Z -> +X
+      newMaterials[5] = newMaterials[1]; // -X -> -Z
+      newMaterials[1] = newMaterials[4]; // +Z -> -X
+      newMaterials[4] = temp; // +X -> +Z
     }
   } else if (axis === 'z') {
     // Rotating around Z-axis affects X and Y faces

@@ -21,9 +21,16 @@ export function Cubie({ cubie }: CubieProps) {
   const meshRef = useRef<Mesh>(null);
   const { position, materials } = cubie;
 
-  // Recreate material array when colors change
+  // Create materials array with proper error handling
   const faceMaterials = useMemo(() => {
-    return materials.map((color) => new THREE.MeshLambertMaterial({ color: COLOR_MAP[color] }));
+    return materials.map((color) => {
+      const colorValue = COLOR_MAP[color] || COLOR_MAP.black;
+      return new THREE.MeshLambertMaterial({ 
+        color: colorValue,
+        transparent: false,
+        opacity: 1
+      });
+    });
   }, [materials]);
 
   return (

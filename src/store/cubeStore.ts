@@ -139,7 +139,7 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
       const newPosition = rotatePosition(cubie.position, axis, clockwise);
       
       // Update materials
-      const newMaterials = rotateMaterialsClockwise(axis, cubie.materials, clockwise);
+      const newMaterials = rotateMaterialsClockwise(axis, [...cubie.materials], clockwise);
       
       return {
         ...cubie,

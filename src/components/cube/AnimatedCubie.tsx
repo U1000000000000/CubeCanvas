@@ -50,11 +50,16 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
     }
   }, [isAnimating, isPartOfRotatingFace, position, animationGroup]);
 
-  // Create materials for each face
+  // Create materials for each face with proper error handling
   const faceMaterials = React.useMemo(() => {
-    return materials.map((color) => 
-      new THREE.MeshLambertMaterial({ color: COLOR_MAP[color] })
-    );
+    return materials.map((color) => {
+      const colorValue = COLOR_MAP[color as keyof typeof COLOR_MAP] || COLOR_MAP.black;
+      return new THREE.MeshLambertMaterial({ 
+        color: colorValue,
+        transparent: false,
+        opacity: 1
+      });
+    });
   }, [materials]);
 
   return (

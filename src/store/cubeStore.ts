@@ -164,6 +164,15 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
     const state = get();
     if (state.isAnimating) return;
 
+    // Reset cube to ensure clean state before scrambling
+    set({
+      cubies: createSolvedCube(),
+      moveCount: 0,
+      startTime: null,
+      currentTime: 0,
+      isAnimating: false,
+      animatingFace: null
+    });
     const faces: Face[] = ['U', 'D', 'L', 'R', 'F', 'B'];
     const moves: Move[] = [];
     
@@ -174,11 +183,37 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
       moves.push({ face, clockwise });
     }
 
-    // Execute moves with delay
-    moves.forEach((move, index) => {
-      setTimeout(() => {
-        get().rotateFace(move.face, move.clockwise);
-      }, index * 300);
+    // Execute moves instantly without animation for scrambling
+    let currentCubies = get().cubies;
+    
+    moves.forEach((move) => {
+      const axis = getFaceRotationAxis(move.face);
+      const rotatingCubies = getCubiesOnFace(currentCubies, move.face);
+      
+      currentCubies = currentCubies.map(cubie => {
+        const isRotating = rotatingCubies.some(rc => rc.id === cubie.id);
+        if (!isRotating) return cubie;
+        
+        // Update position
+        const newPosition = rotatePosition(cubie.position, axis, move.clockwise);
+        
+        // Update materials
+        const newMaterials = rotateMaterialsClockwise(axis, [...cubie.materials], move.clockwise);
+        
+        return {
+          ...cubie,
+          position: newPosition,
+          materials: newMaterials,
+          id: `${newPosition.x},${newPosition.y},${newPosition.z}`
+        };
+      });
+    });
+    
+    // Update state with scrambled cube
+    set({
+      cubies: currentCubies,
+      moveCount: moves.length,
+      startTime: Date.now()
     });
   },
 

@@ -65,11 +65,15 @@ function CubeGroup() {
 
     // Reset animation when complete
     if (progress >= 1) {
-      // Ensure all children are removed from animation group
-      const children = [...animationGroupRef.current.children];
-      children.forEach(child => {
-        animationGroupRef.current!.remove(child);
-      });
+      // Force cleanup of animation group
+      while (animationGroupRef.current.children.length > 0) {
+        const child = animationGroupRef.current.children[0];
+        animationGroupRef.current.remove(child);
+        // Reset child transform
+        child.position.set(0, 0, 0);
+        child.rotation.set(0, 0, 0);
+        child.visible = true;
+      }
       
       animationStartTimeRef.current = 0;
       animationProgressRef.current = 0;

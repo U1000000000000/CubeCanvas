@@ -48,7 +48,7 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
         z: meshRef.current.rotation.z
       };
       animationGroup.current.add(meshRef.current);
-    } else if (!isAnimating) {
+    } else {
       // Always ensure cubie is removed from animation group when not animating
       if (meshRef.current.parent === animationGroup.current) {
         animationGroup.current.remove(meshRef.current);
@@ -65,6 +65,9 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
       // Clear userData
       delete meshRef.current.userData.originalPosition;
       delete meshRef.current.userData.originalRotation;
+      
+      // Ensure cubie is visible
+      meshRef.current.visible = true;
     }
   }, [isAnimating, isPartOfRotatingFace, position, animationGroup]);
 
@@ -104,6 +107,13 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
     });
   }, [materialKey]);
 
+  // Force re-render when cubie data changes
+  React.useEffect(() => {
+    if (meshRef.current) {
+      meshRef.current.material = faceMaterials;
+      meshRef.current.visible = true;
+    }
+  }, [faceMaterials]);
   return (
     <mesh
       ref={meshRef}
@@ -112,6 +122,7 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
       receiveShadow
       material={faceMaterials}
       visible={true}
+      key={`${cubie.id}-${materialKey}`}
     >
       <boxGeometry args={[0.98, 0.98, 0.98]} />
     </mesh>

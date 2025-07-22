@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useMemo } from 'react';
 import { Mesh } from 'three';
 import { CubieState, CubeColor } from '../../types/cube';
 import * as THREE from 'three';
@@ -14,14 +14,15 @@ const COLOR_MAP: Record<CubeColor, string> = {
   orange: '#fd7f28',
   green: '#38a169',
   blue: '#3182ce',
-  black: '#2a2a2a'
+  black: '#2a2a2a',
 };
 
 export function Cubie({ cubie }: CubieProps) {
   const meshRef = useRef<Mesh>(null);
   const { position, materials } = cubie;
 
-  const faceMaterials = React.useMemo(() => {
+  // Recreate material array when colors change
+  const faceMaterials = useMemo(() => {
     return materials.map((color) => new THREE.MeshLambertMaterial({ color: COLOR_MAP[color] }));
   }, [materials]);
 
@@ -37,4 +38,3 @@ export function Cubie({ cubie }: CubieProps) {
     </mesh>
   );
 }
-

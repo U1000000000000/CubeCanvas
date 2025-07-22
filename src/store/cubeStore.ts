@@ -131,19 +131,49 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
     const axis = getFaceRotationAxis(face);
     const rotatingCubies = getCubiesOnFace(state.cubies, face);
     
-    console.log(`Updating ${rotatingCubies.length} cubies for face ${face}`);
+    // Validate we have exactly 9 cubies for rotation
+    if (rotatingCubies.length !== 9) {
+      console.error(`Invalid cubie count for face ${face}: ${rotatingCubies.length}, expected 9`);
+      set({ isAnimating: false, animatingFace: null });
+      return;
+    }
     
     const updatedCubies = state.cubies.map(cubie => {
+      // Validate cubie has required properties
+      if (!cubie || !cubie.position || !cubie.materials || cubie.materials.length !== 6) {
+        console.error(`Invalid cubie detected:`, cubie);
+        return cubie; // Return original cubie to prevent corruption
+      }
+      
       const isRotating = rotatingCubies.some(rc => rc.id === cubie.id);
       if (!isRotating) return cubie;
       
       // Update position
       const newPosition = rotatePosition(cubie.position, axis, clockwise);
       
+      // Validate new position
+      if (!newPosition || typeof newPosition.x !== 'number' || 
+          typeof newPosition.y !== 'number' || typeof newPosition.z !== 'number') {
+        console.error(`Invalid position generated for cubie ${cubie.id}:`, newPosition);
+        return cubie; // Return original cubie
+      }
+      
       // Update materials
       const newMaterials = rotateMaterialsClockwise(axis, cubie.materials, clockwise);
       
-      console.log(`Cubie ${cubie.id}: ${cubie.materials.join(',')} -> ${newMaterials.join(',')}`);
+      // Validate new materials
+      if (!newMaterials || newMaterials.length !== 6) {
+        console.error(`Invalid materials generated for cubie ${cubie.id}:`, newMaterials);
+        return cubie; // Return original cubie
+      }
+      
+      // Validate all materials are valid colors
+      const validColors = ['white', 'yellow', 'red', 'orange', 'green', 'blue', 'black'];
+      const hasInvalidColor = newMaterials.some(color => !validColors.includes(color));
+      if (hasInvalidColor) {
+        console.error(`Invalid color in materials for cubie ${cubie.id}:`, newMaterials);
+        return cubie; // Return original cubie
+      }
       
       return {
         ...cubie,
@@ -153,8 +183,21 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
       };
     });
     
-    // Verify we still have 27 cubies
-    console.log(`Total cubies after update: ${updatedCubies.length}`);
+    // Validate final state
+    if (updatedCubies.length !== 27) {
+      console.error(`Invalid cubie count after update: ${updatedCubies.length}, expected 27`);
+      set({ isAnimating: false, animatingFace: null });
+      return;
+    }
+    
+    // Validate no duplicate positions
+    const positions = updatedCubies.map(c => `${c.position.x},${c.position.y},${c.position.z}`);
+    const uniquePositions = new Set(positions);
+    if (uniquePositions.size !== 27) {
+      console.error(`Duplicate positions detected after rotation`);
+      set({ isAnimating: false, animatingFace: null });
+      return;
+    }
     
     set({
       cubies: updatedCubies,
@@ -205,11 +248,22 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
     const state = get();
     if (state.isAnimating) return;
     
+    // Create fresh solved cube to prevent any state corruption
+    const freshCubies = createSolvedCube();
+    
+    // Validate the fresh cube
+    if (freshCubies.length !== 27) {
+      console.error('Failed to create valid solved cube');
+      return;
+    }
+    
     set({
-      cubies: createSolvedCube(),
+      cubies: freshCubies,
       moveCount: 0,
       startTime: null,
-      currentTime: 0
+      currentTime: 0,
+      isAnimating: false,
+      animatingFace: null
     });
   },
 

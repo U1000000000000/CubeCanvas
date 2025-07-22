@@ -14,6 +14,22 @@ function CubeGroup() {
   const animationProgressRef = useRef(0);
   const animationStartTimeRef = useRef(0);
   const currentRotationRef = useRef({ face: '', clockwise: true });
+  
+  // Validate cubies array
+  const validCubies = React.useMemo(() => {
+    if (!cubies || cubies.length !== 27) {
+      console.error('Invalid cubies array:', cubies?.length);
+      return [];
+    }
+    
+    return cubies.filter(cubie => {
+      if (!cubie || !cubie.position || !cubie.materials || cubie.materials.length !== 6) {
+        console.error('Filtering out invalid cubie:', cubie);
+        return false;
+      }
+      return true;
+    });
+  }, [cubies]);
 
   // Track current rotation parameters
   useEffect(() => {
@@ -75,7 +91,7 @@ function CubeGroup() {
   return (
     <group ref={groupRef}>
       <group ref={animationGroupRef} visible={true} />
-      {cubies.map((cubie) => (
+      {validCubies.map((cubie) => (
         <AnimatedCubie 
           key={cubie.id} 
           cubie={cubie} 

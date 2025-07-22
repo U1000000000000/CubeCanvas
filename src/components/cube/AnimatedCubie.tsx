@@ -23,6 +23,13 @@ const COLOR_MAP = {
 export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
   const meshRef = useRef<Mesh>(null);
   const { isAnimating, animatingFace } = useCubeStore();
+  
+  // Validate cubie data
+  if (!cubie || !cubie.position || !cubie.materials || cubie.materials.length !== 6) {
+    console.error('Invalid cubie data:', cubie);
+    return null; // Don't render invalid cubies
+  }
+  
   const { position, materials } = cubie;
 
   // Check if this cubie is part of the rotating face
@@ -85,26 +92,45 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
 
   // Create materials for each face with proper error handling
   const faceMaterials = React.useMemo(() => {
-    return materials.map((color) => {
+    // Validate materials array
+    if (!materials || materials.length !== 6) {
+      console.error('Invalid materials for cubie:', cubie.id, materials);
+      return Array(6).fill(null).map(() => 
+        new THREE.MeshLambertMaterial({ color: COLOR_MAP.black })
+      );
+    }
+    
+    return materials.map((color, index) => {
       const colorValue = COLOR_MAP[color as keyof typeof COLOR_MAP] || COLOR_MAP.black;
+      
+      // Validate color value
+      if (!colorValue) {
+        console.error(`Invalid color for cubie ${cubie.id} face ${index}:`, color);
+      }
+      
       return new THREE.MeshLambertMaterial({ 
-        color: colorValue,
+        color: colorValue || COLOR_MAP.black,
         transparent: false,
         opacity: 1,
         side: THREE.FrontSide,
-        needsUpdate: true
+        needsUpdate: true,
+        visible: true
       });
     });
-  }, [materials, cubie.id]);
+  }, [materials, cubie.id, materialKey]);
 
   // Update materials when they change
   React.useEffect(() => {
-    if (meshRef.current) {
+    if (meshRef.current && faceMaterials && faceMaterials.length === 6) {
       meshRef.current.material = faceMaterials;
       // Force geometry update
       if (meshRef.current.geometry) {
         meshRef.current.geometry.computeBoundingBox();
+        meshRef.current.geometry.computeBoundingSphere();
       }
+      // Force render update
+      meshRef.current.visible = true;
+      meshRef.current.frustumCulled = false;
     }
   }, [faceMaterials]);
 
@@ -113,8 +139,17 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
     if (meshRef.current) {
       meshRef.current.visible = true;
       meshRef.current.frustumCulled = false; // Prevent culling issues
+      meshRef.current.matrixAutoUpdate = true;
+      meshRef.current.updateMatrix();
     }
-  }, []);
+  }, [cubie.id, position]);
+  
+  // Force re-render when cubie changes
+  React.useEffect(() => {
+    if (meshRef.current) {
+      meshRef.current.updateMatrixWorld(true);
+    }
+  }, [cubie]);
 
   return (
     <mesh
@@ -125,6 +160,7 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
       material={faceMaterials}
       visible={true}
       frustumCulled={false}
+      matrixAutoUpdate={true}
     >
       <boxGeometry args={[0.98, 0.98, 0.98]} />
     </mesh>

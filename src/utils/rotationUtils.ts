@@ -6,8 +6,22 @@ export function rotateMaterialsClockwise(
   materials: CubeColor[],
   clockwise: boolean = true
 ): CubeColor[] {
+  // Validate input
+  if (!materials || materials.length !== 6) {
+    console.error('Invalid materials array for rotation:', materials);
+    return materials || ['black', 'black', 'black', 'black', 'black', 'black'];
+  }
+  
+  // Validate all materials are valid colors
+  const validColors = ['white', 'yellow', 'red', 'orange', 'green', 'blue', 'black'];
+  const hasInvalidColor = materials.some(color => !validColors.includes(color));
+  if (hasInvalidColor) {
+    console.error('Invalid color in materials:', materials);
+    return materials; // Return original to prevent corruption
+  }
+  
   // Create a deep copy to prevent mutation
-  const newMaterials: CubeColor[] = materials.map(color => color);
+  const newMaterials: CubeColor[] = [...materials];
   
   if (axis === 'x') {
     // Rotating around X-axis affects Y and Z faces
@@ -104,6 +118,13 @@ export function rotatePosition(
   axis: 'x' | 'y' | 'z',
   clockwise: boolean
 ): { x: number; y: number; z: number } {
+  // Validate input position
+  if (!position || typeof position.x !== 'number' || 
+      typeof position.y !== 'number' || typeof position.z !== 'number') {
+    console.error('Invalid position for rotation:', position);
+    return position || { x: 0, y: 0, z: 0 };
+  }
+  
   const { x, y, z } = position;
   
   if (axis === 'x') {

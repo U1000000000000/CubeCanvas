@@ -117,37 +117,3 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
     </mesh>
   );
 }
-      animationGroup.current.remove(meshRef.current);
-      meshRef.current.position.set(
-        position.x * 1.05,
-        position.y * 1.05,
-        position.z * 1.05
-      );
-      meshRef.current.rotation.set(0, 0, 0);
-    }
-  }, [isAnimating, isPartOfRotatingFace, position, animationGroup]);
-
-  // Create materials for each face with proper error handling
-  const faceMaterials = React.useMemo(() => {
-    return materials.map((color) => {
-      const colorValue = COLOR_MAP[color as keyof typeof COLOR_MAP] || COLOR_MAP.black;
-      return new THREE.MeshLambertMaterial({ 
-        color: colorValue,
-        transparent: false,
-        opacity: 1
-      });
-    });
-  }, [materials]);
-
-  return (
-    <mesh
-      ref={meshRef}
-      position={[position.x * 1.05, position.y * 1.05, position.z * 1.05]}
-      castShadow
-      receiveShadow
-      material={faceMaterials}
-    >
-      <boxGeometry args={[0.98, 0.98, 0.98]} />
-    </mesh>
-  );
-}

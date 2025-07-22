@@ -20,9 +20,21 @@ function CubeGroup() {
     if (isAnimating && animatingFace) {
       currentRotationRef.current = { face: animatingFace, clockwise: true };
       animationStartTimeRef.current = 0;
+      animationProgressRef.current = 0;
     }
   }, [isAnimating, animatingFace]);
 
+  // Clean up animation group when component unmounts
+  useEffect(() => {
+    return () => {
+      if (animationGroupRef.current) {
+        // Remove all children from animation group
+        while (animationGroupRef.current.children.length > 0) {
+          animationGroupRef.current.remove(animationGroupRef.current.children[0]);
+        }
+      }
+    };
+  }, []);
   // Animation logic
   useFrame((state) => {
     if (!isAnimating || !animatingFace || !animationGroupRef.current) return;
@@ -35,6 +47,7 @@ function CubeGroup() {
     const elapsed = currentTime - animationStartTimeRef.current;
     const duration = 300; // 300ms animation
     const progress = Math.min(elapsed / duration, 1);
+    animationProgressRef.current = progress;
 
     // Calculate rotation
     const axis = getFaceRotationAxis(animatingFace);
@@ -52,14 +65,21 @@ function CubeGroup() {
 
     // Reset animation when complete
     if (progress >= 1) {
+      // Ensure all children are removed from animation group
+      const children = [...animationGroupRef.current.children];
+      children.forEach(child => {
+        animationGroupRef.current!.remove(child);
+      });
+      
       animationStartTimeRef.current = 0;
+      animationProgressRef.current = 0;
       animationGroupRef.current.rotation.set(0, 0, 0);
     }
   });
 
   return (
     <group ref={groupRef}>
-      <group ref={animationGroupRef} />
+      <group ref={animationGroupRef} visible={true} />
       {cubies.map((cubie) => (
         <AnimatedCubie 
           key={cubie.id} 

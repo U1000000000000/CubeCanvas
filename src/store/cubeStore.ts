@@ -149,6 +149,9 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
       };
     });
     
+    // Ensure we have exactly 27 cubies
+    console.log(`Updated cubies count: ${updatedCubies.length}`);
+    
     set({
       cubies: updatedCubies,
       isAnimating: false,

@@ -65,19 +65,10 @@ function CubeGroup() {
 
     // Reset animation when complete
     if (progress >= 1) {
-      // Force cleanup of animation group
-      while (animationGroupRef.current.children.length > 0) {
-        const child = animationGroupRef.current.children[0];
-        animationGroupRef.current.remove(child);
-        // Reset child transform
-        child.position.set(0, 0, 0);
-        child.rotation.set(0, 0, 0);
-        child.visible = true;
-      }
-      
+      // Reset animation group rotation
+      animationGroupRef.current.rotation.set(0, 0, 0);
       animationStartTimeRef.current = 0;
       animationProgressRef.current = 0;
-      animationGroupRef.current.rotation.set(0, 0, 0);
     }
   });
 

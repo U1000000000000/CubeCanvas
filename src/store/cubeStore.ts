@@ -149,9 +149,6 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
       };
     });
     
-    // Ensure we have exactly 27 cubies
-    console.log(`Updated cubies count: ${updatedCubies.length}`);
-    
     set({
       cubies: updatedCubies,
       isAnimating: false,
@@ -164,15 +161,6 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
     const state = get();
     if (state.isAnimating) return;
 
-    // Reset cube to ensure clean state before scrambling
-    set({
-      cubies: createSolvedCube(),
-      moveCount: 0,
-      startTime: null,
-      currentTime: 0,
-      isAnimating: false,
-      animatingFace: null
-    });
     const faces: Face[] = ['U', 'D', 'L', 'R', 'F', 'B'];
     const moves: Move[] = [];
     
@@ -183,38 +171,27 @@ export const useCubeStore = create<CubeStore>((set, get) => ({
       moves.push({ face, clockwise });
     }
 
-    // Execute moves instantly without animation for scrambling
-    let currentCubies = get().cubies;
-    
-    moves.forEach((move) => {
-      const axis = getFaceRotationAxis(move.face);
-      const rotatingCubies = getCubiesOnFace(currentCubies, move.face);
+    // Execute moves with animation
+    let moveIndex = 0;
+    const executeMoves = () => {
+      if (moveIndex >= moves.length) {
+        // Scrambling complete
+        return;
+      }
       
-      currentCubies = currentCubies.map(cubie => {
-        const isRotating = rotatingCubies.some(rc => rc.id === cubie.id);
-        if (!isRotating) return cubie;
-        
-        // Update position
-        const newPosition = rotatePosition(cubie.position, axis, move.clockwise);
-        
-        // Update materials
-        const newMaterials = rotateMaterialsClockwise(axis, [...cubie.materials], move.clockwise);
-        
-        return {
-          ...cubie,
-          position: newPosition,
-          materials: newMaterials,
-          id: `${newPosition.x},${newPosition.y},${newPosition.z}`
-        };
-      });
-    });
+      const move = moves[moveIndex];
+      moveIndex++;
+      
+      // Execute the move with animation
+      get().rotateFace(move.face, move.clockwise);
+      
+      // Schedule next move after current animation completes
+      setTimeout(executeMoves, 350); // 300ms animation + 50ms buffer
+    };
     
-    // Update state with scrambled cube
-    set({
-      cubies: currentCubies,
-      moveCount: moves.length,
-      startTime: Date.now()
-    });
+    // Start timer and execute first move
+    set({ startTime: Date.now() });
+    executeMoves();
   },
 
   reset: () => {

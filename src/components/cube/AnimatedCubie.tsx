@@ -36,58 +36,47 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
     if (!meshRef.current || !animationGroup.current) return;
 
     if (isAnimating && isPartOfRotatingFace) {
-      // Add to animation group and store original position
-      meshRef.current.userData.originalPosition = {
-        x: position.x * 1.05,
-        y: position.y * 1.05,
-        z: position.z * 1.05
-      };
-      meshRef.current.userData.originalRotation = {
-        x: meshRef.current.rotation.x,
-        y: meshRef.current.rotation.y,
-        z: meshRef.current.rotation.z
-      };
-      animationGroup.current.add(meshRef.current);
-    } else {
-      // Always ensure cubie is removed from animation group when not animating
-      if (meshRef.current.parent === animationGroup.current) {
-        animationGroup.current.remove(meshRef.current);
-      }
+      // Store current world position before adding to group
+      const worldPosition = new THREE.Vector3();
+      meshRef.current.getWorldPosition(worldPosition);
+      meshRef.current.userData.worldPosition = worldPosition;
       
-      // Reset position and rotation to match current cube state
+      // Set position relative to animation group
       meshRef.current.position.set(
         position.x * 1.05,
         position.y * 1.05,
         position.z * 1.05
       );
-      meshRef.current.rotation.set(0, 0, 0);
-      
-      // Clear userData
-      delete meshRef.current.userData.originalPosition;
-      delete meshRef.current.userData.originalRotation;
-      
-      // Ensure cubie is visible
-      meshRef.current.visible = true;
+      animationGroup.current.add(meshRef.current);
+    } else {
+      // Remove from animation group and restore proper positioning
+      if (meshRef.current.parent === animationGroup.current) {
+        animationGroup.current.remove(meshRef.current);
+        
+        // Reset position to match current cube state
+        meshRef.current.position.set(
+          position.x * 1.05,
+          position.y * 1.05,
+          position.z * 1.05
+        );
+        meshRef.current.rotation.set(0, 0, 0);
+      }
     }
   }, [isAnimating, isPartOfRotatingFace, position, animationGroup]);
 
-  // Ensure cubie is always visible and properly positioned
+  // Update position when not animating
   useEffect(() => {
-    if (!meshRef.current) return;
+    if (!meshRef.current || isAnimating) return;
     
-    // Make sure the cubie is visible
-    meshRef.current.visible = true;
-    
-    // If not animating, ensure proper position
-    if (!isAnimating) {
+    // Update position to match current state
+    if (meshRef.current.parent !== animationGroup.current) {
       meshRef.current.position.set(
         position.x * 1.05,
         position.y * 1.05,
         position.z * 1.05
       );
-      meshRef.current.rotation.set(0, 0, 0);
     }
-  }, [position, isAnimating]);
+  }, [position, isAnimating, animationGroup]);
 
   // Force re-render when materials change
   const materialKey = React.useMemo(() => {
@@ -111,9 +100,9 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
   React.useEffect(() => {
     if (meshRef.current) {
       meshRef.current.material = faceMaterials;
-      meshRef.current.visible = true;
     }
   }, [faceMaterials]);
+
   return (
     <mesh
       ref={meshRef}
@@ -121,7 +110,6 @@ export function AnimatedCubie({ cubie, animationGroup }: AnimatedCubieProps) {
       castShadow
       receiveShadow
       material={faceMaterials}
-      visible={true}
       key={`${cubie.id}-${materialKey}`}
     >
       <boxGeometry args={[0.98, 0.98, 0.98]} />

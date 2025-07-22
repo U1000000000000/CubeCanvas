@@ -21,17 +21,8 @@ export function Cubie({ cubie }: CubieProps) {
   const meshRef = useRef<Mesh>(null);
   const { position, materials } = cubie;
 
-  // Create initial materials
-  const materialRefs = useRef<THREE.MeshLambertMaterial[]>(
-    materials.map((color) => new THREE.MeshLambertMaterial({ color: COLOR_MAP[color] }))
-  );
-
-  // Update face colors when materials change
-  React.useEffect(() => {
-    materials.forEach((color, i) => {
-      const mat = materialRefs.current[i];
-      if (mat) mat.color.set(COLOR_MAP[color]);
-    });
+  const faceMaterials = React.useMemo(() => {
+    return materials.map((color) => new THREE.MeshLambertMaterial({ color: COLOR_MAP[color] }));
   }, [materials]);
 
   return (
@@ -40,9 +31,10 @@ export function Cubie({ cubie }: CubieProps) {
       position={[position.x * 1.05, position.y * 1.05, position.z * 1.05]}
       castShadow
       receiveShadow
-      material={materialRefs.current}
+      material={faceMaterials}
     >
       <boxGeometry args={[0.98, 0.98, 0.98]} />
     </mesh>
   );
 }
+

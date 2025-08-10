@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
+import { CubeScanPage } from './pages/CubeScanPage';
 import { Cube2Page } from './pages/Cube2Page';
 import { Cube3Page } from './pages/Cube3Page';
 import { Cube4Page } from './pages/Cube4Page';
@@ -10,6 +11,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/scan" element={<CubeScanPage />} />
         <Route path="/cube/2" element={<Cube2Page />} />
         <Route path="/cube/3" element={<Cube3Page />} />
         <Route path="/cube/4" element={<Cube4Page />} />

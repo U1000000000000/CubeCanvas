@@ -4,8 +4,7 @@ import {
   rotateMaterialsClockwise,
   getFaceRotationAxis,
   getFaceRotationDirection,
-  rotatePosition,
-  getCubiesOnFace
+  rotatePosition
 } from '../utils/rotationUtils';
 
 // 2x2 Cube positions
@@ -54,6 +53,22 @@ function createSolved2x2Cube(): CubieState[] {
     }
   }
   return cubies;
+}
+
+// 2x2-specific function to get cubies on a face
+function getCubiesOnFace2x2(cubies: CubieState[], face: Face): CubieState[] {
+  return cubies.filter(cubie => {
+    const { x, y, z } = cubie.position;
+    switch (face) {
+      case 'F': return z === 0.5;   // Front face
+      case 'B': return z === -0.5;  // Back face
+      case 'R': return x === 0.5;   // Right face
+      case 'L': return x === -0.5;  // Left face
+      case 'U': return y === 0.5;   // Up face
+      case 'D': return y === -0.5;  // Down face
+      default: return false;
+    }
+  });
 }
 
 // Helper to wait for current animation to finish
@@ -132,7 +147,7 @@ export const useCubeStore2x2 = create<CubeStore2x2>((_set, _get) => {
     updateCubiePositionsAndMaterials: (face: Face, clockwise: boolean) => {
       const state = get();
       const axis = getFaceRotationAxis(face);
-      const rotatingCubies = getCubiesOnFace(state.cubies, face);
+      const rotatingCubies = getCubiesOnFace2x2(state.cubies, face);
 
       if (rotatingCubies.length !== 4) {
         console.error(`Invalid cubie count for 2x2 face ${face}: ${rotatingCubies.length}`);

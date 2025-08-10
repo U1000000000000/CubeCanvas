@@ -5,7 +5,6 @@ import {
   getFaceRotationAxis,
   getFaceRotationDirection,
   rotatePosition,
-  getCubiesOnFace
 } from '../utils/rotationUtils';
 
 // 4x4 Cube positions
@@ -69,6 +68,22 @@ function createSolved4x4Cube(): CubieState[] {
     }
   }
   return cubies;
+}
+
+// 4x4-specific function to get cubies on a face
+function getCubiesOnFace4x4(cubies: CubieState[], face: Face): CubieState[] {
+  return cubies.filter(cubie => {
+    const { x, y, z } = cubie.position;
+    switch (face) {
+      case 'U': return y === 1.5;  // Top face
+      case 'D': return y === -1.5; // Bottom face
+      case 'L': return x === -1.5; // Left face
+      case 'R': return x === 1.5;  // Right face
+      case 'F': return z === 1.5;  // Front face
+      case 'B': return z === -1.5; // Back face
+      default: return false;
+    }
+  });
 }
 
 // Helper to wait for current animation to finish
@@ -147,7 +162,7 @@ export const useCubeStore4x4 = create<CubeStore4x4>((_set, _get) => {
     updateCubiePositionsAndMaterials: (face: Face, clockwise: boolean) => {
       const state = get();
       const axis = getFaceRotationAxis(face);
-      const rotatingCubies = getCubiesOnFace(state.cubies, face);
+      const rotatingCubies = getCubiesOnFace4x4(state.cubies, face);
 
       if (rotatingCubies.length !== 16) {
         console.error(`Invalid cubie count for 4x4 face ${face}: ${rotatingCubies.length}`);

@@ -49,26 +49,3 @@ export function getAverageColor(canvas, x, y, width, height) {
     b: Math.round(b / pixelCount)
   };
 }
-
-// Get average color from a region of canvas
-export function getAverageColor(canvas, x, y, width, height) {
-  const ctx = canvas.getContext('2d');
-  const imageData = ctx.getImageData(x, y, width, height);
-  const data = imageData.data;
-  
-  let r = 0, g = 0, b = 0;
-  let pixelCount = 0;
-  
-  for (let i = 0; i < data.length; i += 4) {
-    r += data[i];
-    g += data[i + 1];
-    b += data[i + 2];
-    pixelCount++;
-  }
-  
-  return {
-    r: Math.round(r / pixelCount),
-    g: Math.round(g / pixelCount),
-    b: Math.round(b / pixelCount)
-  };
-}

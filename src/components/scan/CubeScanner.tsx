@@ -20,6 +20,7 @@ export function CubeScanner({ onScanComplete }) {
   const [currentFaceIndex, setCurrentFaceIndex] = useState(0);
   const [scannedFaces, setScannedFaces] = useState({});
   const [isCapturing, setIsCapturing] = useState(false);
+  const [isVideoReady, setIsVideoReady] = useState(false);
 
   const currentFace = FACE_ORDER[currentFaceIndex];
   const isComplete = Object.keys(scannedFaces).length === 6;
@@ -84,7 +85,7 @@ export function CubeScanner({ onScanComplete }) {
     const canvas = canvasRef.current;
     const video = videoRef.current;
     
-    if (!canvas || !video) return;
+    if (!canvas || !video || !isVideoReady) return;
     
     setIsCapturing(true);
     
@@ -181,6 +182,11 @@ export function CubeScanner({ onScanComplete }) {
           autoPlay
           playsInline
           muted
+          onLoadedMetadata={() => {
+            if (videoRef.current && videoRef.current.videoWidth > 0) {
+              setIsVideoReady(true);
+            }
+          }}
           className="w-full max-w-2xl mx-auto rounded-lg"
         />
         <canvas
@@ -200,11 +206,11 @@ export function CubeScanner({ onScanComplete }) {
           </p>
           <button
             onClick={captureFace}
-            disabled={isCapturing}
+            disabled={isCapturing || !isVideoReady}
             className="px-8 py-3 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:opacity-50 flex items-center gap-2 mx-auto"
           >
             <Square className="w-5 h-5" />
-            {isCapturing ? 'Capturing...' : 'Capture Face'}
+            {isCapturing ? 'Capturing...' : !isVideoReady ? 'Loading video...' : 'Capture Face'}
           </button>
         </div>
       )}

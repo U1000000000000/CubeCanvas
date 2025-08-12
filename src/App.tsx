@@ -5,6 +5,7 @@ import { CubeScanPage } from './pages/CubeScanPage';
 import { Cube2Page } from './pages/Cube2Page';
 import { Cube3Page } from './pages/Cube3Page';
 import { Cube4Page } from './pages/Cube4Page';
+import { ManualSolvePage } from './pages/ManualSolvePage';
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/cube/2" element={<Cube2Page />} />
         <Route path="/cube/3" element={<Cube3Page />} />
         <Route path="/cube/4" element={<Cube4Page />} />
+        <Route path="/manual-solve" element={<ManualSolvePage />} />
       </Routes>
     </Router>
   );

@@ -1,5 +1,5 @@
 export type Face = 'U' | 'D' | 'L' | 'R' | 'F' | 'B';
-export type CubeColor = 'white' | 'yellow' | 'red' | 'orange' | 'green' | 'blue' | 'black';
+export type CubeColor = 'white' | 'yellow' | 'red' | 'orange' | 'green' | 'blue' | 'black' | 'gray';
 
 export interface CubiePosition {
   x: number;

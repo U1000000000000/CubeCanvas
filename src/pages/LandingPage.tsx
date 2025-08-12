@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Cuboid as Cube, Play, Star, Trophy, Camera } from 'lucide-react';
+import { Cuboid as Cube, Play, Star, Trophy, Camera, Palette } from 'lucide-react';
 
 export function LandingPage() {
   const cubes = [
@@ -45,6 +45,15 @@ export function LandingPage() {
     icon: <Camera className="w-6 h-6" />
   };
 
+  const manualFeature = {
+    label: 'Manual Cube Solver',
+    description: 'Paint your cube and solve it',
+    color: 'from-indigo-500 to-purple-500',
+    hoverColor: 'hover:from-indigo-600 hover:to-purple-600',
+    route: '/manual-solve',
+    icon: <Palette className="w-6 h-6" />
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-purple-900 flex flex-col">
       {/* Header */}
@@ -68,14 +77,15 @@ export function LandingPage() {
       {/* Main Content */}
       <main className="flex-1 flex items-center justify-center p-8">
         <div className="max-w-6xl w-full">
-          {/* Scan Feature - Featured prominently */}
+          {/* New Features - Featured prominently */}
           <div className="mb-12">
-            <h2 className="text-2xl font-bold text-white text-center mb-6">✨ New Feature</h2>
-            <div className="max-w-md mx-auto">
+            <h2 className="text-2xl font-bold text-white text-center mb-6">✨ New Features</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+              {/* Scan Feature */}
               <Link
                 to={scanFeature.route}
                 className={`
-                  block p-8 rounded-2xl shadow-2xl transition-all duration-300 transform
+                  block p-6 rounded-2xl shadow-2xl transition-all duration-300 transform
                   bg-gradient-to-br ${scanFeature.color} ${scanFeature.hoverColor}
                   hover:scale-105 hover:shadow-3xl
                   border border-white/10 backdrop-blur-sm
@@ -83,7 +93,7 @@ export function LandingPage() {
                 `}
               >
                 {/* Card Header */}
-                <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center justify-between mb-4">
                   <div className="flex items-center gap-3">
                     {scanFeature.icon}
                     <span className="text-sm font-semibold text-white/90 bg-white/20 px-3 py-1 rounded-full">
@@ -97,7 +107,7 @@ export function LandingPage() {
                 </div>
 
                 {/* Scan Visual */}
-                <div className="flex justify-center mb-6">
+                <div className="flex justify-center mb-4">
                   <div className="relative">
                     <div className="w-20 h-20 bg-white/20 rounded-lg border-2 border-white/30 flex items-center justify-center">
                       <Camera className="w-10 h-10 text-white" />
@@ -113,7 +123,7 @@ export function LandingPage() {
                   <h2 className="text-2xl font-bold text-white mb-2">
                     {scanFeature.label}
                   </h2>
-                  <p className="text-white/80 mb-6">
+                  <p className="text-white/80 mb-4">
                     {scanFeature.description}
                   </p>
                   
@@ -121,6 +131,63 @@ export function LandingPage() {
                   <div className="flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 transition-colors duration-200 rounded-xl py-3 px-6 font-semibold text-white">
                     <Camera className="w-5 h-5" />
                     <span>Start Scanning</span>
+                  </div>
+                </div>
+
+                {/* Hover Effect Overlay */}
+                <div className="absolute inset-0 bg-white/5 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+              </Link>
+              
+              {/* Manual Solve Feature */}
+              <Link
+                to={manualFeature.route}
+                className={`
+                  block p-6 rounded-2xl shadow-2xl transition-all duration-300 transform
+                  bg-gradient-to-br ${manualFeature.color} ${manualFeature.hoverColor}
+                  hover:scale-105 hover:shadow-3xl
+                  border border-white/10 backdrop-blur-sm
+                  animate-fade-in-up
+                `}
+              >
+                {/* Card Header */}
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    {manualFeature.icon}
+                    <span className="text-sm font-semibold text-white/90 bg-white/20 px-3 py-1 rounded-full">
+                      Interactive
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-2xl font-bold text-white">🎨</div>
+                    <div className="text-xs text-white/70">paint</div>
+                  </div>
+                </div>
+
+                {/* Manual Visual */}
+                <div className="flex justify-center mb-4">
+                  <div className="relative">
+                    <div className="w-20 h-20 bg-white/20 rounded-lg border-2 border-white/30 flex items-center justify-center">
+                      <Palette className="w-10 h-10 text-white" />
+                    </div>
+                    <div className="absolute -top-1 -right-1 w-6 h-6 bg-purple-400 rounded-full flex items-center justify-center text-xs font-bold text-gray-900">
+                      3D
+                    </div>
+                  </div>
+                </div>
+
+                {/* Card Content */}
+                <div className="text-center">
+                  <h2 className="text-2xl font-bold text-white mb-2">
+                    {manualFeature.label}
+                  </h2>
+                  <p className="text-white/80 mb-4">
+                    {manualFeature.description}
+                  </p>
+                  
+                  {/* Play Button */}
+                  <div className="flex items-center justify-center gap-2 bg-white/20 hover:bg-white/30 transition-colors duration-200 rounded-xl py-3 px-6 font-semibold text-white">
+                    <Palette className="w-5 h-5" />
+                    <span>Start Painting</span>
                   </div>
                 </div>
 
@@ -204,6 +271,13 @@ export function LandingPage() {
           <div className="text-center">
             <h3 className="text-2xl font-bold text-white mb-8">Features</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-white/80">
+              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/10">
+                <div className="w-12 h-12 bg-indigo-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
+                  <Palette className="w-6 h-6 text-indigo-400" />
+                </div>
+                <h4 className="font-semibold mb-2">Manual Painting</h4>
+                <p className="text-sm">Click and paint each sticker to match your physical cube</p>
+              </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/10">
                 <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Camera className="w-6 h-6 text-purple-400" />

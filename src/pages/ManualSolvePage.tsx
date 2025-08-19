@@ -329,100 +329,15 @@
 //             </div>
 //           </div>
 //         </div>
-
-//         <div className="flex-1 min-h-[600px] rounded-2xl overflow-hidden border border-white/10">
-//           <ManualCube
-//             onStickerClick={handleStickerClick}
-//             stickerColors={stickerColors}
-//           />
-//         </div>
-//       </div>
-
-//       <footer className="p-4 text-center text-white/50 text-sm">
-//         Manual Cube Solver • Click colors then click stickers to paint • Centers
-//         are pre-filled
-//       </footer>
-//     </div>
-//   );
-// }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-// src/pages/ManualSolvePage.tsx
-import React, { useState, useEffect } from "react";
-import { ManualCube } from "../components/manual/ManualCube";
-import { useManualCubeStore } from "../store/manualCubeStore";   
-import { CubeColor } from "../types/cube";
-import { parseMoves } from "../utils/solver";
-
-const COLORS: CubeColor[] = ["white", "yellow", "red", "orange", "green", "blue"];
-
-export function ManualSolvePage() {
-  const [selectedColor, setSelectedColor] = useState<CubeColor>("white");
-  const [isComplete, setIsComplete] = useState(false);
-
-  const { cubies, rotateFace, isAnimating } = useManualCubeStore();
-
-  // Log cubies for debugging
-  useEffect(() => {
-    console.log("Cubies updated:", cubies.map(c => ({
-      id: c.id,
-      position: c.position,
-      materials: c.materials
-    })));
-  }, [cubies]);
-
-  // Check completion status
-  useEffect(() => {
-    if (!cubies.length) return;
-    const anyIncomplete = cubies.some((cubie) => {
-      const faces = cubie.materials;
-      if (!faces) return true;
-      const { x, y, z } = cubie.position;
-      const visible: number[] = [];
-      if (x === 1) visible.push(0);
-      if (x === -1) visible.push(1);
-      if (y === 1) visible.push(2);
-      if (y === -1) visible.push(3);
-      if (z === 1) visible.push(4);
-      if (z === -1) visible.push(5);
-      return visible.some((i) => faces[i] === "gray");
+  // Helper function to parse moves from solution string
+  const parseMoves = (solution: string) => {
+    if (!solution) return [];
+    return solution.trim().split(/\s+/).map((token) => {
+      const face = token[0] as 'U' | 'D' | 'L' | 'R' | 'F' | 'B';
+      const clockwise = !token.includes("'");
+      const double = token.includes("2");
+      return { face, clockwise, double };
     });
-    setIsComplete(!anyIncomplete);
-  }, [cubies]);
-
-  const handleStickerClick = (cubieId: string, faceIndex: number) => {
-    if (isAnimating) return;
-    
-    console.log(`Clicked cubie ${cubieId}, face ${faceIndex}, setting to ${selectedColor}`);
-    
-    // Update the store's cubie materials directly
-    const { cubies: currentCubies } = useManualCubeStore.getState();
-    const updatedCubies = currentCubies.map(cubie => {
-      if (cubie.id === cubieId) {
-        const newMaterials = [...cubie.materials];
-        newMaterials[faceIndex] = selectedColor;
-        console.log(`Updated cubie ${cubieId} materials:`, newMaterials);
-        return { ...cubie, materials: newMaterials };
-      }
-      return cubie;
-    });
-    
-    useManualCubeStore.setState({ cubies: updatedCubies });
   };
 
   const solveCube = async () => {
@@ -454,7 +369,7 @@ export function ManualSolvePage() {
     const solution = "U";
     const moves = parseMoves(solution);
     
-    for (let i = 0; i < moves.length; i++) {
+      // Hardcoded solution for UI development
       const move = moves[i];
       console.log(`\n=== EXECUTING ${move.face} ${move.clockwise ? 'CLOCKWISE' : 'COUNTERCLOCKWISE'} ===`);
       
@@ -467,7 +382,7 @@ export function ManualSolvePage() {
       }
       
       // Wait for animation and state update
-      await new Promise((res) => setTimeout(res, 800));
+      setError("Something went wrong while solving.");
       
       console.log("=== AFTER U MOVE ===");
       const newCubies = useManualCubeStore.getState().cubies;

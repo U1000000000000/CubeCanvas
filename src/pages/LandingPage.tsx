@@ -5,16 +5,6 @@ import { Cuboid as Cube, Play, Star, Trophy, Camera, Palette } from 'lucide-reac
 export function LandingPage() {
   const cubes = [
     { 
-      size: 2, 
-      label: '2×2×2 Cube', 
-      description: 'Perfect for beginners',
-      color: 'from-blue-500 to-blue-600',
-      hoverColor: 'hover:from-blue-600 hover:to-blue-700',
-      pieces: 8,
-      difficulty: 'Beginner',
-      icon: <Star className="w-6 h-6" />
-    },
-    { 
       size: 3, 
       label: '3×3×3 Cube', 
       description: 'The classic original',
@@ -23,17 +13,7 @@ export function LandingPage() {
       pieces: 27,
       difficulty: 'Intermediate',
       icon: <Trophy className="w-6 h-6" />
-    },
-    { 
-      size: 4, 
-      label: '4×4×4 Cube', 
-      description: 'Advanced challenge',
-      color: 'from-purple-500 to-purple-600',
-      hoverColor: 'hover:from-purple-600 hover:to-purple-700',
-      pieces: 56,
-      difficulty: 'Advanced',
-      icon: <Cube className="w-6 h-6" />
-    },
+    }
   ];
 
   const scanFeature = {
@@ -142,13 +122,13 @@ export function LandingPage() {
 
           {/* Virtual Cubes */}
           <div className="mb-8">
-            <h2 className="text-2xl font-bold text-white text-center mb-6">Virtual Cubes</h2>
+            <h2 className="text-2xl font-bold text-white text-center mb-6">Virtual Cube</h2>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+          <div className="flex justify-center mb-16">
             {cubes.map((cube, index) => (
               <div
                 key={cube.size}
-                className="group relative"
+                className="group relative max-w-md"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <Link
@@ -213,17 +193,10 @@ export function LandingPage() {
           {/* Features Section */}
           <div className="text-center">
             <h3 className="text-2xl font-bold text-white mb-8">Features</h3>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-white/80">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-white/80">
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/10">
                 <div className="w-12 h-12 bg-indigo-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Palette className="w-6 h-6 text-indigo-400" />
-                </div>
-                <h4 className="font-semibold mb-2">Manual Painting</h4>
-                <p className="text-sm">Click and paint each sticker to match your physical cube</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-                <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Palette className="w-6 h-6 text-purple-400" />
                 </div>
                 <h4 className="font-semibold mb-2">Manual Painting</h4>
                 <p className="text-sm">Click and paint each sticker to match your physical cube</p>
@@ -236,18 +209,11 @@ export function LandingPage() {
                 <p className="text-sm">Realistic 3D cube with smooth animations and intuitive controls</p>
               </div>
               <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/10">
-                <div className="w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Play className="w-6 h-6 text-green-400" />
-                </div>
-                <h4 className="font-semibold mb-2">Multiple Sizes</h4>
-                <p className="text-sm">From beginner 2×2 to challenging 4×4 cubes</p>
-              </div>
-              <div className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/10">
                 <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <Trophy className="w-6 h-6 text-purple-400" />
                 </div>
-                <h4 className="font-semibold mb-2">Track Progress</h4>
-                <p className="text-sm">Timer, move counter, and scramble functions</p>
+                <h4 className="font-semibold mb-2">Solve Animation</h4>
+                <p className="text-sm">Watch step-by-step solution with smooth animations</p>
               </div>
             </div>
           </div>
@@ -256,7 +222,7 @@ export function LandingPage() {
 
       {/* Footer */}
       <footer className="p-6 text-center text-white/50 text-sm border-t border-white/10">
-        <p>Built with React Three Fiber • AI-powered cube solving • Drag to rotate view • Click and drag faces to solve</p>
+        <p>Built with React Three Fiber • Manual cube solving • Drag to rotate view • Click and paint stickers to solve</p>
       </footer>
     </div>
   );

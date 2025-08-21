@@ -44,7 +44,7 @@ export function ManualCubie({ cubie, animationGroup, mainGroup, onStickerClick }
   const bodyRef = useRef<Mesh>(null);
   const groupRef = useRef<Group>(null);
   const wasAnimatingRef = useRef(false);
-  const { animatingCubies } = useManualCubeStore();  // ⬅️ changed
+  const { animatingCubies, stickerColors } = useManualCubeStore();  // ⬅️ changed
 
   const { position } = cubie;
   const shouldAnimate = animatingCubies.includes(cubie.id);
@@ -85,8 +85,9 @@ export function ManualCubie({ cubie, animationGroup, mainGroup, onStickerClick }
         <boxGeometry args={[0.98, 0.98, 0.98]} />
         <meshLambertMaterial color={COLOR_MAP.black} />
       </mesh>
-      {stickerColors.map((color, i) => {
-      {cubie.materials.map((color, i) => {
+      {Array.from({ length: 6 }, (_, i) => {
+        const stickerId = `${cubie.id}-${i}`;
+        const color = stickerColors[stickerId] || 'gray';
         const hex = COLOR_MAP[color] ?? COLOR_MAP.gray;
         const basePos = BASE_FACE_POS[i];
         const baseRot = BASE_FACE_ROT[i];
@@ -107,9 +108,6 @@ export function ManualCubie({ cubie, animationGroup, mainGroup, onStickerClick }
         <boxGeometry args={[1.0, 1.0, 1.0]} />
         <meshBasicMaterial color="black" wireframe />
       </mesh>
-    }
-    )
-    }
     </group>
   );
 }

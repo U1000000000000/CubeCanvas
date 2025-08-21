@@ -12,6 +12,28 @@ const FACE_COLORS = {
   BACK: "blue",
 } as const;
 
+// Initialize sticker colors - 54 stickers total (9 per face * 6 faces)
+function createInitialStickerColors(): Record<string, string> {
+  const colors: Record<string, string> = {};
+  
+  // Initialize all stickers as gray
+  for (let face = 0; face < 6; face++) {
+    for (let sticker = 0; sticker < 9; sticker++) {
+      colors[`${face}-${sticker}`] = '#444';
+    }
+  }
+  
+  // Set center stickers to their face colors
+  colors['0-4'] = '#ff0000'; // Right face center - red
+  colors['1-4'] = '#ff8c00'; // Left face center - orange  
+  colors['2-4'] = '#ffffff'; // Top face center - white
+  colors['3-4'] = '#ffff00'; // Bottom face center - yellow
+  colors['4-4'] = '#00ff00'; // Front face center - green
+  colors['5-4'] = '#0000ff'; // Back face center - blue
+  
+  return colors;
+}
+
 function getInitialMaterials(x: number, y: number, z: number): CubeColor[] {
   const materials: CubeColor[] = ["gray", "gray", "gray", "gray", "gray", "gray"];
   // Fixed the bug: z was referenced instead of y for the back face
@@ -150,10 +172,16 @@ interface ManualCubeStore {
   animatingFace: Face | null;
   rotationDirection: boolean | null;
   animatingCubies: string[];
+  stickerColors: Record<string, string>;
+  selectedColor: string | null;
 
   rotateFace: (face: Face, clockwise?: boolean) => void;
   updateCubiePositionsAndMaterials: (face: Face, clockwise: boolean) => void;
   setAnimatingCubies: (ids: string[]) => void;
+  setSelectedColor: (color: string) => void;
+  setStickerColor: (stickerId: string, color: string) => void;
+  isComplete: () => boolean;
+  resetCube: () => void;
   reset: () => void;
 }
 
@@ -163,8 +191,39 @@ export const useManualCubeStore = create<ManualCubeStore>((set,get)=>({
   animatingFace:null,
   rotationDirection:null,
   animatingCubies:[],
+  stickerColors: createInitialStickerColors(),
+  selectedColor: null,
 
   setAnimatingCubies:(ids:string[])=>set({animatingCubies:ids}),
+
+  setSelectedColor: (color: string) => set({ selectedColor: color }),
+
+  setStickerColor: (stickerId: string, color: string) => {
+    const currentColors = get().stickerColors;
+    set({
+      stickerColors: {
+        ...currentColors,
+        [stickerId]: color
+      }
+    });
+  },
+
+  isComplete: () => {
+    const colors = get().stickerColors;
+    return Object.values(colors).every(color => color !== '#444');
+  },
+
+  resetCube: () => {
+    set({
+      cubies: createManualCube(),
+      isAnimating: false,
+      animatingFace: null,
+      rotationDirection: null,
+      animatingCubies: [],
+      stickerColors: createInitialStickerColors(),
+      selectedColor: null,
+    });
+  },
 
   rotateFace:(face,clockwise=true)=>{
     if(get().isAnimating) return;
@@ -194,5 +253,7 @@ export const useManualCubeStore = create<ManualCubeStore>((set,get)=>({
     animatingFace:null,
     rotationDirection:null,
     animatingCubies:[],
+    stickerColors: createInitialStickerColors(),
+    selectedColor: null,
   }),
 }));

@@ -111,9 +111,7 @@ export function ManualSolvePage() {
             <div className="aspect-square bg-gray-50 rounded-lg flex items-center justify-center">
               <ManualCube 
                 stickerColors={stickerColors}
-                selectedColor={selectedColor}
                 onStickerClick={setStickerColor}
-                isAnimating={isAnimating}
               />
             </div>
 

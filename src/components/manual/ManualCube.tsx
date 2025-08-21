@@ -9,10 +9,9 @@ import { Face, CubeColor } from '../../types/cube';
 
 interface ManualCubeProps {
   onStickerClick: (cubieId: string, faceIndex: number) => void;
-  stickerColors: Record<string, CubeColor[]>;
 }
 
-function CubeGroup({ onStickerClick, stickerColors }: ManualCubeProps) {
+function CubeGroup({ onStickerClick }: ManualCubeProps) {
   const groupRef = useRef<Group>(null);
   const animationGroupRef = useRef<Group>(null);
 
@@ -98,14 +97,13 @@ function CubeGroup({ onStickerClick, stickerColors }: ManualCubeProps) {
           animationGroup={animationGroupRef}
           mainGroup={groupRef}
           onStickerClick={onStickerClick}
-          stickerColors={stickerColors[cubie.id] ?? ["gray","gray","gray","gray","gray","gray"]}
         />
       ))}
     </group>
   );
 }
 
-function Scene({ onStickerClick, stickerColors }: ManualCubeProps) {
+function Scene({ onStickerClick }: ManualCubeProps) {
   return (
     <>
       <ambientLight intensity={0.6} />
@@ -115,14 +113,14 @@ function Scene({ onStickerClick, stickerColors }: ManualCubeProps) {
       <pointLight position={[5, 5, 5]} intensity={0.4} />
       <pointLight position={[-5, -5, 5]} intensity={0.4} />
 
-      <CubeGroup onStickerClick={onStickerClick} stickerColors={stickerColors} />
+      <CubeGroup onStickerClick={onStickerClick} />
 
       <OrbitControls enablePan={false} enableZoom enableRotate minDistance={4} maxDistance={20} enableDamping dampingFactor={0.05}/>
     </>
   );
 }
 
-export function ManualCube({ onStickerClick, stickerColors }: ManualCubeProps) {
+export function ManualCube({ onStickerClick }: ManualCubeProps) {
   return (
     <div className="w-full h-full">
       <Canvas
@@ -133,7 +131,7 @@ export function ManualCube({ onStickerClick, stickerColors }: ManualCubeProps) {
         style={{ background: "transparent" }}
         dpr={[1, 2]}
       >
-        <Scene onStickerClick={onStickerClick} stickerColors={stickerColors} />
+        <Scene onStickerClick={onStickerClick} />
       </Canvas>
     </div>
   );

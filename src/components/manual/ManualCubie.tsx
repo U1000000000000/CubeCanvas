@@ -1,7 +1,7 @@
 // src/components/manual/ManualCubie.tsx
 import React, { useRef, useEffect } from 'react';
 import { Mesh, Group } from 'three';
-import { CubieState, CubeColor } from '../../types/cube';
+import { CubieState } from '../../types/cube';
 import { useManualCubeStore } from '../../store/manualCubeStore';  // ⬅️ changed
 import * as THREE from 'three';
 
@@ -10,10 +10,9 @@ interface ManualCubieProps {
   animationGroup: React.RefObject<Group>;
   mainGroup: React.RefObject<Group>;
   onStickerClick: (cubieId: string, faceIndex: number) => void;
-  stickerColors: CubeColor[];
 }
 
-const COLOR_MAP: Record<CubeColor | 'black' | 'gray', string> = {
+const COLOR_MAP: Record<string, string> = {
   white: '#ffffff',
   yellow: '#ffed4a',
   red: '#e53e3e',
@@ -41,16 +40,11 @@ const BASE_FACE_ROT = [
   [ 0,  Math.PI, 0],
 ];
 
-export function ManualCubie({ cubie, animationGroup, mainGroup, onStickerClick, stickerColors }: ManualCubieProps) {
+export function ManualCubie({ cubie, animationGroup, mainGroup, onStickerClick }: ManualCubieProps) {
   const bodyRef = useRef<Mesh>(null);
   const groupRef = useRef<Group>(null);
   const wasAnimatingRef = useRef(false);
   const { animatingCubies } = useManualCubeStore();  // ⬅️ changed
-
-  if (!cubie || !cubie.position || !stickerColors || stickerColors.length !== 6) {
-    console.error('Invalid cubie data:', cubie);
-    return null;
-  }
 
   const { position } = cubie;
   const shouldAnimate = animatingCubies.includes(cubie.id);
@@ -92,6 +86,7 @@ export function ManualCubie({ cubie, animationGroup, mainGroup, onStickerClick, 
         <meshLambertMaterial color={COLOR_MAP.black} />
       </mesh>
       {stickerColors.map((color, i) => {
+      {cubie.materials.map((color, i) => {
         const hex = COLOR_MAP[color] ?? COLOR_MAP.gray;
         const basePos = BASE_FACE_POS[i];
         const baseRot = BASE_FACE_ROT[i];

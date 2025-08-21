@@ -173,7 +173,7 @@ export function ManualSolvePage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <span className="bg-blue-100 text-blue-800 rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold mt-0.5">4</span>
-                  Click "Solve Cube" to see the solution
+                  Click "Solve Cube\" to see the solution
                 </li>
               </ol>
             </div>

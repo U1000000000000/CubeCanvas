@@ -40,6 +40,12 @@ export function ManualSolvePage() {
     setIsAnimating(false);
   };
 
+  const handleStickerClick = (stickerId: string, currentColor: string) => {
+    if (selectedColor) {
+      setStickerColor(stickerId, selectedColor);
+    }
+  };
+
   const handleReset = () => {
     resetCube();
     setSolutionMoves([]);
@@ -110,7 +116,7 @@ export function ManualSolvePage() {
             
             <div className="aspect-square bg-gray-50 rounded-lg flex items-center justify-center">
               <ManualCube 
-                onStickerClick={setStickerColor}
+                onStickerClick={handleStickerClick}
               />
             </div>
 

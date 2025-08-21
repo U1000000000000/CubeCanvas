@@ -8,7 +8,7 @@ import { getFaceRotationAxis, getFaceRotationDirection } from '../../utils/rotat
 import { Face, CubeColor } from '../../types/cube';
 
 interface ManualCubeProps {
-  onStickerClick: (cubieId: string, faceIndex: number) => void;
+  onStickerClick: (stickerId: string, currentColor: string) => void;
 }
 
 function CubeGroup({ onStickerClick }: ManualCubeProps) {

@@ -2,11 +2,11 @@ import React from 'react';
 import { CubeColor } from '../../types/cube';
 
 interface ColorPaletteProps {
-  onColorSelect: (color: CubeColor) => void;
-  selectedColor: CubeColor | null;
+  onColorSelect: (color: string) => void;
+  selectedColor: string | null;
 }
 
-const COLORS: { color: CubeColor; name: string; hex: string }[] = [
+const COLORS: { color: string; name: string; hex: string }[] = [
   { color: 'white', name: 'White', hex: '#ffffff' },
   { color: 'yellow', name: 'Yellow', hex: '#ffed4a' },
   { color: 'red', name: 'Red', hex: '#e53e3e' },
@@ -27,10 +27,10 @@ export function ColorPalette({ onColorSelect, selectedColor }: ColorPaletteProps
         {COLORS.map(({ color, name, hex }) => (
           <button
             key={color}
-            onClick={() => onColorSelect(color)}
+            onClick={() => onColorSelect(hex)}
             className={`
               flex items-center gap-3 p-3 rounded-lg transition-all duration-200
-              ${selectedColor === color 
+              ${selectedColor === hex 
                 ? 'bg-white/20 border-2 border-white/50' 
                 : 'bg-white/10 hover:bg-white/15 border-2 border-transparent'
               }
@@ -48,7 +48,7 @@ export function ColorPalette({ onColorSelect, selectedColor }: ColorPaletteProps
       {selectedColor && (
         <div className="mt-4 p-3 bg-white/10 rounded-lg">
           <p className="text-white/80 text-sm">
-            Selected: <span className="font-semibold text-white">{selectedColor}</span>
+            Selected: <span className="font-semibold text-white">{COLORS.find(c => c.hex === selectedColor)?.name || 'Unknown'}</span>
           </p>
           <p className="text-white/60 text-xs mt-1">
             Click any cube sticker to apply this color

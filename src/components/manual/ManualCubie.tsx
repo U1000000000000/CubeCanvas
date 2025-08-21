@@ -98,7 +98,15 @@ export function ManualCubie({ cubie, animationGroup, mainGroup, onStickerClick }
         ];
         const rot = baseRot as [number, number, number];
         return (
-          <mesh key={i} position={pos} rotation={rot} onClick={(e) => { e.stopPropagation(); onStickerClick(cubie.id, i); }}>
+          <mesh 
+            key={i} 
+            position={pos} 
+            rotation={rot} 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              onStickerClick(`${cubie.id}-${i}`, hex); 
+            }}
+          >
             <planeGeometry args={[0.9, 0.9]} />
             <meshBasicMaterial color={hex} side={THREE.DoubleSide} />
           </mesh>

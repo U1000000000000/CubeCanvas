@@ -107,6 +107,9 @@ export function ManualCubie({ cubie, animationGroup, mainGroup, onStickerClick }
         <boxGeometry args={[1.0, 1.0, 1.0]} />
         <meshBasicMaterial color="black" wireframe />
       </mesh>
+    }
+    )
+    }
     </group>
   );
 }

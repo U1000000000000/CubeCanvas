@@ -8,13 +8,14 @@ interface CubieProps {
 }
 
 const COLOR_MAP: Record<CubeColor, string> = {
-  white: '#ffffff',
-  yellow: '#ffed4a',
-  red: '#e53e3e',
-  orange: '#fd7f28',
-  green: '#38a169',
-  blue: '#3182ce',
-  black: '#2a2a2a',
+  white: '#FFFFFF',
+  yellow: '#FFD700',
+  red: '#C41E3A',
+  orange: '#FF8C00',
+  green: '#228B22',
+  blue: '#0057B8',
+  black: '#000',
+  gray: '#444444',
 };
 
 export function Cubie({ cubie }: CubieProps) {

@@ -12,6 +12,7 @@
   "dependencies": {
     "@react-three/drei": "^9.88.13",
     "@react-three/fiber": "^8.15.11",
+    "cube-solver": "^2.4.1",
     "cubing": "^0.58.2",
     "kociemba": "^1.0.1",
     "lucide-react": "^0.344.0",

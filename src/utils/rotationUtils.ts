@@ -13,7 +13,7 @@ export function rotateMaterialsClockwise(
   }
   
   // Validate all materials are valid colors
-  const validColors = ['white', 'yellow', 'red', 'orange', 'green', 'blue', 'black'];
+  const validColors = ['white', 'yellow', 'red', 'orange', 'green', 'blue', 'black', 'gray'];
   const hasInvalidColor = materials.some(color => !validColors.includes(color));
   if (hasInvalidColor) {
     console.error('Invalid color in materials:', materials);
@@ -97,16 +97,19 @@ export function getFaceRotationAxis(face: string): 'x' | 'y' | 'z' {
   }
 }
 
-// Get rotation direction multiplier for each face
+// 🔥 CRITICAL FIX: Corrected rotation direction logic
 export function getFaceRotationDirection(face: string, clockwise: boolean): number {
   const baseDirection = clockwise ? 1 : -1;
   
-  // Some faces need inverted rotation to match visual expectation
+  // FIXED: Only L face needs direction inversion for proper visual rotation
   switch (face) {
-    case 'D': // Down face rotates opposite
-    case 'L': // Left face rotates opposite
-    case 'B': // Back face rotates opposite
+    case 'L': // Left face - invert direction (this was correct)
       return -baseDirection;
+    case 'U': // Up face - keep original direction
+    case 'D': // Down face - keep original direction  
+    case 'R': // Right face - keep original direction
+    case 'F': // Front face - keep original direction
+    case 'B': // Back face - keep original direction
     default:
       return baseDirection;
   }

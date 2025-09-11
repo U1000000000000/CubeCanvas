@@ -55,6 +55,7 @@ export function TimelineManualSolvePage() {
     stopTimeline,
     resetTimeline,
     jumpToTimestamp,
+    scrubTimeline,
   } = useTimelineAnimation({
     solution: solution,
     enabled: !!solution,
@@ -71,6 +72,17 @@ export function TimelineManualSolvePage() {
   >("paused");
   const scrollTimeoutRef = useRef<NodeJS.Timeout>();
   const instructionTimeoutRef = useRef<NodeJS.Timeout>();
+  const touchStartY = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (
+      timelineState.isActive &&
+      scrollDirection !== "paused" &&
+      scrubTimeline
+    ) {
+      scrubTimeline(scrollDirection);
+    }
+  }, [scrollDirection, timelineState.isActive, scrubTimeline]);
 
   // Show instructions when timeline starts
   useEffect(() => {
@@ -178,7 +190,7 @@ export function TimelineManualSolvePage() {
     tempWarning,
   ]);
 
-  // 🔥 FIXED: Improved scroll detection with longer timeout and better tracking
+  // Wheel event listener for desktop scrolling
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
       if (timelineState.isActive) {
@@ -215,6 +227,80 @@ export function TimelineManualSolvePage() {
       }
     };
   }, [timelineState.isActive]);
+
+  // ADDED: Touch event handling for mobile devices
+  useEffect(() => {
+    // Only run this logic when the timeline is active
+    if (!timelineState.isActive) return;
+
+    const handleTouchStart = (e: TouchEvent) => {
+      // Record the starting Y position of the first touch
+      if (e.touches.length > 0) {
+        touchStartY.current = e.touches[0].clientY;
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      // If we don't have a starting point, do nothing
+      if (touchStartY.current === null || e.touches.length === 0) {
+        return;
+      }
+
+      // Prevent the browser from scrolling the page
+      e.preventDefault();
+
+      const currentY = e.touches[0].clientY;
+      const deltaY = currentY - touchStartY.current;
+
+      // Set a threshold to avoid accidental micro-swipes
+      const swipeThreshold = 5;
+
+      if (Math.abs(deltaY) > swipeThreshold) {
+        // Determine direction (swiping finger down scrolls forward, up scrolls reverse)
+        const direction = deltaY > 0 ? "reverse" : "forward";
+        setScrollDirection(direction);
+
+        // Reset the start position to make the scrolling continuous
+        touchStartY.current = currentY;
+
+        // Clear any existing timeout to keep the animation running
+        if (scrollTimeoutRef.current) {
+          clearTimeout(scrollTimeoutRef.current);
+        }
+
+        // Set a timeout to pause the animation when the user stops swiping
+        scrollTimeoutRef.current = setTimeout(() => {
+          setScrollDirection("paused");
+        }, 300); // A shorter timeout feels more responsive on touch
+      }
+    };
+
+    const handleTouchEnd = () => {
+      // When the user lifts their finger, reset the start position and pause
+      touchStartY.current = null;
+      setScrollDirection("paused");
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+
+    // Add event listeners
+    document.addEventListener("touchstart", handleTouchStart, {
+      passive: true,
+    });
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+    document.addEventListener("touchend", handleTouchEnd, { passive: true });
+
+    // Cleanup function to remove listeners
+    return () => {
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, [timelineState.isActive]); // Rerun effect if timeline state changes
 
   // 🔥 DEBUG: Log scroll direction changes
   useEffect(() => {
@@ -663,11 +749,7 @@ export function TimelineManualSolvePage() {
               <div className="space-y-2 text-black text-sm sm:text-base">
                 <div className="flex items-center justify-center gap-3">
                   <div className="flex items-center gap-1">
-                    <ArrowUp
-                      size={16}
-                      className="text-black"
-                      strokeWidth={2}
-                    />
+                    <ArrowUp size={16} className="text-black" strokeWidth={2} />
                     <span className="text-xs sm:text-sm">or scroll up</span>
                   </div>
                   <span className="text-black">•</span>
@@ -719,7 +801,7 @@ export function TimelineManualSolvePage() {
         >
           <Atom
             size={20}
-            className={`sm:w-6 sm:h-6 transition-all duration-300 ${
+            className={`sm:w-极 sm:h-6 transition-all duration-300 ${
               particlesVisible ? "opacity-80" : "opacity-50"
             } text-black`}
             strokeWidth={2}
@@ -913,7 +995,7 @@ export function TimelineManualSolvePage() {
           className="absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 z-40"
           style={{ zIndex: 100 }}
         >
-          <div className="flex gap-1 sm:gap-2 bg-white/20 backdrop-blur-md rounded-full px-2 sm:px-4 py-1 sm:py-2 shadow-lg max-w-[70vw] sm:max-w-md overflow-x-auto scrollbar-hide">
+          <div className="flex gap-1 sm:gap-2 bg-white/20 backdrop-blur-md rounded-full px-2 sm:px-4 py-1 sm:py-2 shadow-lg max-w-[70vw] sm:极-w-md overflow-x-auto scrollbar-hide">
             {solution.split(" ").map((move, index) => {
               const currentLogicalMoveIndex =
                 timelineState.currentLogicalMoveIndex;

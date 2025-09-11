@@ -857,6 +857,21 @@ export function useTimelineAnimation({
     [isActive]
   );
 
+  const SCRUB_SPEED = 0.01; // Controls how fast the timeline moves when scrolling. Adjust if needed.
+
+  const scrubTimeline = useCallback(
+    (direction: "forward" | "reverse") => {
+      if (!isActive) return;
+
+      const delta = direction === "forward" ? SCRUB_SPEED : -SCRUB_SPEED;
+      const newTarget = targetTimestampRef.current + delta;
+
+      // Clamp the new target between 0 and 1 to prevent going out of bounds
+      targetTimestampRef.current = Math.max(0, Math.min(1, newTarget));
+    },
+    [isActive] // Dependency array ensures the function has the current `isActive` state
+  );  
+
   const currentFrame = getCurrentFrame(currentTimestamp);
   const totalMoves = movesRef.current.length;
   const progress = currentTimestamp * 100;
@@ -883,6 +898,7 @@ export function useTimelineAnimation({
     stopTimeline,
     resetTimeline,
     jumpToTimestamp,
+    scrubTimeline, 
     currentTimestamp,
     targetTimestamp: targetTimestampRef.current,
     frames,

@@ -495,7 +495,7 @@ export default function CubeCanvasLanding() {
 
   const getDifference = () => {
     if (screenSize.width < 480) return "translate(-50%, -130%)"; // Very small mobile
-    if (screenSize.width < 768) return "translate(-50%, -150%)"; // Mobile
+    if (screenSize.width < 768) return "translate(-50%, -170%)"; // Mobile
     if (screenSize.width < 1024) return "translate(-50%, -120%)"; // Tablet
     return "translate(-50%, -170%)"; // Desktop
   };

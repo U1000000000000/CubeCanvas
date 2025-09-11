@@ -651,26 +651,26 @@ export function TimelineManualSolvePage() {
           className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 animate-fade-in"
           style={{ zIndex: 150 }}
         >
-          <div className="bg-white/20 backdrop-blur-md rounded-2xl px-6 sm:px-8 py-4 sm:py-6 shadow-2xl border border-white/30 max-w-sm sm:max-w-md mx-4">
+          <div className="bg-white/50 backdrop-blur-md rounded-2xl px-6 sm:px-8 py-4 sm:py-6 shadow-2xl border border-white/30 max-w-sm sm:max-w-md mx-4">
             <div className="flex flex-col items-center gap-3 sm:gap-4 text-center">
-              <div className="flex items-center gap-2 text-white">
+              <div className="flex items-center gap-2 text-black">
                 <Move3D size={20} className="sm:w-6 sm:h-6" strokeWidth={2} />
                 <h3 className="font-bold text-lg sm:text-xl">
                   Timeline Controls
                 </h3>
               </div>
 
-              <div className="space-y-2 text-white/90 text-sm sm:text-base">
+              <div className="space-y-2 text-black text-sm sm:text-base">
                 <div className="flex items-center justify-center gap-3">
                   <div className="flex items-center gap-1">
                     <ArrowUp
                       size={16}
-                      className="text-white/80"
+                      className="text-black"
                       strokeWidth={2}
                     />
                     <span className="text-xs sm:text-sm">or scroll up</span>
                   </div>
-                  <span className="text-white/60">•</span>
+                  <span className="text-black">•</span>
                   <span className="font-medium">Rewind</span>
                 </div>
 
@@ -678,19 +678,19 @@ export function TimelineManualSolvePage() {
                   <div className="flex items-center gap-1">
                     <ArrowDown
                       size={16}
-                      className="text-white/80"
+                      className="text-black"
                       strokeWidth={2}
                     />
                     <span className="text-xs sm:text-sm">or scroll down</span>
                   </div>
-                  <span className="text-white/60">•</span>
+                  <span className="text-black">•</span>
                   <span className="font-medium">Forward</span>
                 </div>
               </div>
 
               <div className="w-full h-px bg-white/20 my-1"></div>
 
-              <p className="text-white/70 text-xs sm:text-sm leading-relaxed">
+              <p className="text-black text-xs sm:text-sm leading-relaxed">
                 Use scroll wheel or arrow keys to control the solving timeline
               </p>
             </div>
@@ -700,7 +700,7 @@ export function TimelineManualSolvePage() {
 
       {/* Background Particles Toggle - Bottom Left */}
       <div
-        className="absolute bottom-6 sm:bottom-8 left-4 sm:left-6 pointer-events-auto"
+        className="absolute bottom-[calc(3rem+env(safe-area-inset-bottom))] sm:bottom-8 left-4 sm:left-6 pointer-events-auto"
         style={{ zIndex: 100 }}
       >
         <button
@@ -729,7 +729,7 @@ export function TimelineManualSolvePage() {
 
       {timelineState.isActive && (
         <div
-          className="absolute bottom-6 sm:bottom-12 right-4 sm:right-6 z-50"
+          className="absolute bottom-[calc(3rem+env(safe-area-inset-bottom))] sm:bottom-12 right-4 sm:right-6 z-50"
           style={{ zIndex: 100 }}
         >
           <button
@@ -778,7 +778,7 @@ export function TimelineManualSolvePage() {
 
       {/* UNIFIED CONTAINER FOR BUTTON AND WARNING */}
       <div
-        className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col-reverse items-center gap-3 w-full px-4"
+        className="absolute bottom-[calc(3rem+env(safe-area-inset-bottom))] sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col-reverse items-center gap-3 w-full px-4"
         style={{ zIndex: 100 }}
       >
         {/* Solve / Stop Buttons */}

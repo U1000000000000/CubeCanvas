@@ -34,7 +34,7 @@ export function Stats() {
   return (
     // Small screens: bottom center below buttons with full transparency
     // Large screens: bottom right with semi-transparency
-    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 sm:bottom-12 sm:right-4 sm:left-auto sm:translate-x-0 sm:right-6 z-50">
+    <div className="absolute bottom-[calc(3rem+env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 sm:bottom-12 sm:right-4 sm:left-auto sm:translate-x-0 sm:right-6 z-50">
       <div className="flex flex-row items-center gap-3 bg-transparent sm:bg-white/25 backdrop-blur-none sm:backdrop-blur-md rounded-full px-3 sm:px-4 py-2 shadow-none sm:shadow-lg text-black font-medium text-sm">
         
         {/* Timer Section */}

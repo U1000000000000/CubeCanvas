@@ -64,7 +64,7 @@ export function CubePage() {
         <Stats />
         {/* Background Particles Toggle - Bottom Left */}
         <div
-          className="absolute bottom-12 sm:bottom-8 left-4 sm:left-6 pointer-events-auto"
+          className="absolute bottom-[calc(3rem+env(safe-area-inset-bottom))] sm:bottom-8 left-4 sm:left-6 pointer-events-auto"
           style={{ zIndex: 100 }}
         >
           <button
@@ -92,7 +92,7 @@ export function CubePage() {
         </div>
         {/* Bottom Center Buttons Container */}
         <div
-          className="absolute bottom-12 sm:bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto"
+          className="absolute bottom-[calc(3rem+env(safe-area-inset-bottom))] sm:bottom-8 left-1/2 -translate-x-1/2 pointer-events-auto"
           style={{ zIndex: 100 }}
         >
           <div className="relative flex items-center justify-center">

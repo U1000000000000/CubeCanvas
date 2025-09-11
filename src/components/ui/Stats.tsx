@@ -32,29 +32,26 @@ export function Stats() {
   };
 
   return (
-    <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/10">
-      <h2 className="text-xl font-bold text-white mb-4">Statistics</h2>
-      
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-white/80">
-            <Timer className="w-4 h-4" />
-            <span>Time</span>
-          </div>
-          <div className="text-xl font-mono font-bold text-white">
-            {formatTime(currentTime)}
-          </div>
+    // Small screens: bottom center below buttons with full transparency
+    // Large screens: bottom right with semi-transparency
+    <div className="absolute bottom-2 left-1/2 -translate-x-1/2 sm:bottom-12 sm:right-4 sm:left-auto sm:translate-x-0 sm:right-6 z-50">
+      <div className="flex flex-row items-center gap-3 bg-transparent sm:bg-white/25 backdrop-blur-none sm:backdrop-blur-md rounded-full px-3 sm:px-4 py-2 shadow-none sm:shadow-lg text-black font-medium text-sm">
+        
+        {/* Timer Section */}
+        <div className="flex items-center gap-1.5">
+          <Timer className="w-4 h-4 opacity-80" />
+          <span>{formatTime(currentTime)}</span>
         </div>
         
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-white/80">
-            <Hash className="w-4 h-4" />
-            <span>Moves</span>
-          </div>
-          <div className="text-xl font-mono font-bold text-white">
-            {moveCount}
-          </div>
+        {/* Separator */}
+        <div className="w-px h-4 bg-white/30"></div>
+
+        {/* Move Count Section */}
+        <div className="flex items-center gap-1.5">
+          <Hash className="w-4 h-4 opacity-80" />
+          <span>{moveCount}</span>
         </div>
+
       </div>
     </div>
   );

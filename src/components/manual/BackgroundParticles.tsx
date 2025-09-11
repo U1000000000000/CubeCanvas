@@ -43,6 +43,8 @@ interface BackgroundParticlesProps {
   particleCount?: number;
   scrollDirection?: "forward" | "reverse" | "paused";
   minDistance?: number;
+  alwaysAnimate?: boolean;
+  animateMovement?: boolean; // New prop to control movement
 }
 
 // Helper function to calculate distance between two particles
@@ -78,24 +80,49 @@ const findValidPosition = (
   existingParticles: Particle[],
   size: number,
   minDistance: number,
-  maxRetries = 50
-): { x: number; y: number; centerX: number; centerY: number } | null => {
-  const screenCenterX = window.innerWidth / 2;
-  const screenCenterY = window.innerHeight / 2;
+  maxRetries = 100
+): { x: number; y: number; centerX: number; centerY: number } => {
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+  const screenCenterX = screenWidth / 2;
+  const screenCenterY = screenHeight / 2;
 
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    const distributionPattern = Math.floor(Math.random() * 3);
-    let centerX, centerY;
-
-    if (distributionPattern === 0) {
-      centerX = screenCenterX + (Math.random() - 0.5) * window.innerWidth * 0.6;
-      centerY =
-        screenCenterY + (Math.random() - 0.5) * window.innerHeight * 0.6;
-    } else if (distributionPattern === 1) {
+  // Try different placement strategies
+  const strategies = [
+    // Strategy 1: Random position with orbital placement
+    () => {
+      const centerX = size + Math.random() * (screenWidth - size * 2);
+      const centerY = size + Math.random() * (screenHeight - size * 2);
+      const orbitAngle = Math.random() * Math.PI * 2;
+      const orbitRadius = Math.random() * 100 + 30;
+      return {
+        x: centerX + Math.cos(orbitAngle) * orbitRadius,
+        y: centerY + Math.sin(orbitAngle) * orbitRadius,
+        centerX,
+        centerY,
+      };
+    },
+    // Strategy 2: Position near screen center
+    () => {
+      const centerX = screenCenterX + (Math.random() - 0.5) * screenWidth * 0.4;
+      const centerY =
+        screenCenterY + (Math.random() - 0.5) * screenHeight * 0.4;
+      const orbitAngle = Math.random() * Math.PI * 2;
+      const orbitRadius = Math.random() * 80 + 20;
+      return {
+        x: centerX + Math.cos(orbitAngle) * orbitRadius,
+        y: centerY + Math.sin(orbitAngle) * orbitRadius,
+        centerX,
+        centerY,
+      };
+    },
+    // Strategy 3: Position in one of the quadrants
+    () => {
       const quadrant = Math.floor(Math.random() * 4);
-      const offsetX = window.innerWidth * (0.2 + Math.random() * 0.3);
-      const offsetY = window.innerHeight * (0.2 + Math.random() * 0.3);
+      const offsetX = screenWidth * (0.2 + Math.random() * 0.3);
+      const offsetY = screenHeight * (0.2 + Math.random() * 0.3);
 
+      let centerX, centerY;
       switch (quadrant) {
         case 0:
           centerX = screenCenterX - offsetX;
@@ -117,27 +144,41 @@ const findValidPosition = (
           centerX = screenCenterX;
           centerY = screenCenterY;
       }
-    } else {
-      centerX = size + Math.random() * (window.innerWidth - size * 2);
-      centerY = size + Math.random() * (window.innerHeight - size * 2);
-    }
 
-    const orbitAngle = Math.random() * Math.PI * 2;
-    const orbitRadius = Math.random() * 100 + 30;
-    const x = centerX + Math.cos(orbitAngle) * orbitRadius;
-    const y = centerY + Math.sin(orbitAngle) * orbitRadius;
+      const orbitAngle = Math.random() * Math.PI * 2;
+      const orbitRadius = Math.random() * 100 + 30;
+      return {
+        x: centerX + Math.cos(orbitAngle) * orbitRadius,
+        y: centerY + Math.sin(orbitAngle) * orbitRadius,
+        centerX,
+        centerY,
+      };
+    },
+  ];
 
-    if (isValidPosition(x, y, size, existingParticles, minDistance)) {
-      return { x, y, centerX, centerY };
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const strategy = strategies[Math.floor(Math.random() * strategies.length)];
+    const position = strategy();
+
+    if (
+      isValidPosition(
+        position.x,
+        position.y,
+        size,
+        existingParticles,
+        minDistance
+      )
+    ) {
+      return position;
     }
   }
 
-  console.warn("Could not find valid position for particle, using fallback");
+  // Fallback: Use a completely random position without distance check
   return {
-    x: Math.random() * window.innerWidth,
-    y: Math.random() * window.innerHeight,
-    centerX: Math.random() * window.innerWidth,
-    centerY: Math.random() * window.innerHeight,
+    x: Math.random() * screenWidth,
+    y: Math.random() * screenHeight,
+    centerX: Math.random() * screenWidth,
+    centerY: Math.random() * screenHeight,
   };
 };
 
@@ -180,6 +221,8 @@ export const BackgroundParticles: React.FC<BackgroundParticlesProps> = ({
   particleCount = 15,
   scrollDirection = "paused",
   minDistance = 80,
+  alwaysAnimate = false,
+  animateMovement = true, // Default to true for backward compatibility
 }) => {
   const [particles, setParticles] = useState<Particle[]>([]);
   const [animationPhase, setAnimationPhase] = useState(0);
@@ -214,12 +257,19 @@ export const BackgroundParticles: React.FC<BackgroundParticlesProps> = ({
   useEffect(() => {
     const initParticles = () => {
       const newParticles: Particle[] = [];
+      const screenWidth = window.innerWidth;
+      const screenHeight = window.innerHeight;
 
-      for (let i = 0; i < particleCount; i++) {
-        const size = Math.random() * 40 + 30; // Slightly larger for better detail visibility
+      // Calculate maximum possible particles based on screen size and minDistance
+      const areaPerParticle = Math.PI * Math.pow(minDistance, 2);
+      const maxParticles = Math.floor(
+        (screenWidth * screenHeight) / areaPerParticle
+      );
+      const actualParticleCount = Math.min(particleCount, maxParticles);
 
+      for (let i = 0; i < actualParticleCount; i++) {
+        const size = Math.random() * 40 + 30;
         const position = findValidPosition(newParticles, size, minDistance);
-        if (!position) continue;
 
         const orbitAngle = Math.random() * Math.PI * 2;
         const orbitRadius = Math.random() * 100 + 30;
@@ -259,7 +309,7 @@ export const BackgroundParticles: React.FC<BackgroundParticlesProps> = ({
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, [particleCount, minDistance]);
-
+  
   useEffect(() => {
     if (animationFrameRef.current) {
       cancelAnimationFrame(animationFrameRef.current);
@@ -277,8 +327,8 @@ export const BackgroundParticles: React.FC<BackgroundParticlesProps> = ({
       return;
     }
 
-    // Only animate when scrolling (not when paused)
-    if (scrollDirection === "paused" && isAnimationEnabled) {
+    // Only animate when scrolling (not when paused) unless alwaysAnimate is true
+    if (scrollDirection === "paused" && !alwaysAnimate && isAnimationEnabled) {
       console.log("🎨 Animation paused - no scroll detected");
       return;
     }
@@ -286,47 +336,53 @@ export const BackgroundParticles: React.FC<BackgroundParticlesProps> = ({
     console.log("🎨 Starting animation with direction:", scrollDirection);
 
     const animate = () => {
-      const directionMultiplier = scrollDirection === "reverse" ? -1 : 1;
+      // Use always forward direction if alwaysAnimate is enabled
+      const directionMultiplier = alwaysAnimate ? 1 : 
+                                (scrollDirection === "reverse" ? -1 : 1);
       const speedMultiplier = 3;
 
       setParticles((prevParticles) => {
         // First, update particle positions
         let updatedParticles = prevParticles.map((particle) => {
-          // Orbital motion with direction control and increased speed
-          const newOrbitAngle =
-            particle.orbitAngle +
-            particle.orbitSpeed * directionMultiplier * speedMultiplier;
-          const newX =
-            particle.centerX + Math.cos(newOrbitAngle) * particle.orbitRadius;
-          const newY =
-            particle.centerY + Math.sin(newOrbitAngle) * particle.orbitRadius;
-
-          // Wrap around screen edges
-          let wrappedX = newX;
-          let wrappedY = newY;
+          // Only update position if movement animation is enabled
+          let newX = particle.x;
+          let newY = particle.y;
           let newCenterX = particle.centerX;
           let newCenterY = particle.centerY;
+          let newOrbitAngle = particle.orbitAngle;
 
-          if (newX < -particle.size) {
-            wrappedX = window.innerWidth + particle.size;
-            newCenterX = window.innerWidth + particle.size;
-          } else if (newX > window.innerWidth + particle.size) {
-            wrappedX = -particle.size;
-            newCenterX = -particle.size;
-          }
+          if (animateMovement) {
+            // Orbital motion with direction control and increased speed
+            newOrbitAngle =
+              particle.orbitAngle +
+              particle.orbitSpeed * directionMultiplier * speedMultiplier;
+            newX =
+              particle.centerX + Math.cos(newOrbitAngle) * particle.orbitRadius;
+            newY =
+              particle.centerY + Math.sin(newOrbitAngle) * particle.orbitRadius;
 
-          if (newY < -particle.size) {
-            wrappedY = window.innerHeight + particle.size;
-            newCenterY = window.innerHeight + particle.size;
-          } else if (newY > window.innerHeight + particle.size) {
-            wrappedY = -particle.size;
-            newCenterY = -particle.size;
+            // Wrap around screen edges
+            if (newX < -particle.size) {
+              newX = window.innerWidth + particle.size;
+              newCenterX = window.innerWidth + particle.size;
+            } else if (newX > window.innerWidth + particle.size) {
+              newX = -particle.size;
+              newCenterX = -particle.size;
+            }
+
+            if (newY < -particle.size) {
+              newY = window.innerHeight + particle.size;
+              newCenterY = window.innerHeight + particle.size;
+            } else if (newY > window.innerHeight + particle.size) {
+              newY = -particle.size;
+              newCenterY = -particle.size;
+            }
           }
 
           return {
             ...particle,
-            x: wrappedX,
-            y: wrappedY,
+            x: newX,
+            y: newY,
             centerX: newCenterX,
             centerY: newCenterY,
             orbitAngle: newOrbitAngle,
@@ -336,21 +392,25 @@ export const BackgroundParticles: React.FC<BackgroundParticlesProps> = ({
           };
         });
 
-        // Then apply repulsion forces to maintain spacing
-        updatedParticles = applyRepulsionForces(updatedParticles, minDistance);
+        // Then apply repulsion forces to maintain spacing (only if movement is enabled)
+        if (animateMovement) {
+          updatedParticles = applyRepulsionForces(updatedParticles, minDistance);
+        }
 
         return updatedParticles;
       });
 
-      // 🔥 CRITICAL: Continue animation only if still scrolling and active
-      if (isActive && scrollDirection !== "paused") {
+      // Continue animation if still active and (always animating or actually scrolling)
+      if (isActive && (alwaysAnimate || scrollDirection !== "paused")) {
         animationFrameRef.current = requestAnimationFrame(animate);
       } else {
         console.log(
           "🎨 Animation loop ended - isActive:",
           isActive,
           "scrollDirection:",
-          scrollDirection
+          scrollDirection,
+          "alwaysAnimate:",
+          alwaysAnimate
         );
       }
     };
@@ -365,7 +425,15 @@ export const BackgroundParticles: React.FC<BackgroundParticlesProps> = ({
         animationFrameRef.current = undefined;
       }
     };
-  }, [isActive, scrollDirection, particles.length, minDistance, isAnimationEnabled]);
+  }, [
+    isActive,
+    scrollDirection,
+    particles.length,
+    minDistance,
+    isAnimationEnabled,
+    alwaysAnimate,
+    animateMovement, // Add to dependencies
+  ]);
 
   return (
     <div
@@ -393,7 +461,7 @@ export const BackgroundParticles: React.FC<BackgroundParticlesProps> = ({
             color={particle.color}
             rotation={particle.rotation}
             animationPhase={animationPhase} // Pass animation phase
-            animate={isAnimationEnabled && scrollDirection !== "paused"}
+            animate={isAnimationEnabled && (alwaysAnimate || scrollDirection !== "paused")}
           />
         </div>
       ))}

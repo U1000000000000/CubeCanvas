@@ -19,6 +19,7 @@ export const PARTICLE_ICONS = [
   "bird",
   "horse",
   "ball",
+  "sphere",
   "rollercoaster",
   "skates",
   "drone",
@@ -941,6 +942,19 @@ export const CustomIcon: React.FC<CustomIconProps> = ({
               strokeWidth="0.5"
               fill="none"
               opacity="0.5"
+            />
+          </svg>
+        );
+      case "sphere":
+        return (
+          <svg viewBox="0 0 24 24" fill="none" style={iconStyle}>
+            <circle
+              cx="12"
+              cy="12"
+              r="8"
+              fill={color}
+              stroke="#333"
+              strokeWidth="2"
             />
           </svg>
         );
@@ -3097,7 +3111,14 @@ export const CustomIcon: React.FC<CustomIconProps> = ({
               opacity="0.5"
             />
             {/* Motion effect */}
-            <ellipse cx="21" cy="12" rx="0.8" ry="2" fill={color} opacity="0.3" />
+            <ellipse
+              cx="21"
+              cy="12"
+              rx="0.8"
+              ry="2"
+              fill={color}
+              opacity="0.3"
+            />
           </svg>
         );
       case "golf":

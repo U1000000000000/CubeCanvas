@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- Cube outline -->
+  <rect x="2" y="2" width="60" height="60" rx="8" ry="8" fill="black" stroke="black" stroke-width="2"/>
+
+  <!-- Grid lines -->
+  <line x1="22" y1="2" x2="22" y2="62" stroke="white" stroke-width="2"/>
+  <line x1="42" y1="2" x2="42" y2="62" stroke="white" stroke-width="2"/>
+  <line x1="2" y1="22" x2="62" y2="22" stroke="white" stroke-width="2"/>
+  <line x1="2" y1="42" x2="62" y2="42" stroke="white" stroke-width="2"/>
+
+  <!-- Stickers -->
+  <rect x="4"  y="4"  width="18" height="18" fill="#ff3b30"/> <!-- Red -->
+  <rect x="24" y="4"  width="18" height="18" fill="#34c759"/> <!-- Green -->
+  <rect x="44" y="4"  width="18" height="18" fill="#007aff"/> <!-- Blue -->
+
+  <rect x="4"  y="24" width="18" height="18" fill="#ffcc00"/> <!-- Yellow -->
+  <rect x="24" y="24" width="18" height="18" fill="#ffffff"/> <!-- White -->
+  <rect x="44" y="24" width="18" height="18" fill="#ff9500"/> <!-- Orange -->
+
+  <rect x="4"  y="44" width="18" height="18" fill="#007aff"/> <!-- Blue -->
+  <rect x="24" y="44" width="18" height="18" fill="#ff3b30"/> <!-- Red -->
+  <rect x="44" y="44" width="18" height="18" fill="#34c759"/> <!-- Green -->
+</svg>

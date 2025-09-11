@@ -554,7 +554,7 @@ export default function CubeCanvasLanding() {
         )}
 
         {/* ✅ Catchy Tagline at Bottom Center */}
-        <div className="absolute bottom-6 w-full flex justify-center px-4 z-30">
+        <div className="absolute bottom-[calc(3rem+env(safe-area-inset-bottom))] w-full flex justify-center px-4 z-30">
           <div className="bg-white/20 backdrop-blur-md text-white text-sm sm:text-base md:text-lg font-light px-6 sm:px-8 py-2 sm:py-3 rounded-full shadow-lg border border-white/30">
             Where Math Meets Play 
           </div>

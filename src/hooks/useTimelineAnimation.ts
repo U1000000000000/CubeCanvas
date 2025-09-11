@@ -857,7 +857,7 @@ export function useTimelineAnimation({
     [isActive]
   );
 
-  const SCRUB_SPEED = 0.01; // Controls how fast the timeline moves when scrolling. Adjust if needed.
+  const SCRUB_SPEED = 0.05; // Controls how fast the timeline moves when scrolling. Adjust if needed.
 
   const scrubTimeline = useCallback(
     (direction: "forward" | "reverse") => {

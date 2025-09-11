@@ -234,44 +234,46 @@ export function TimelineManualSolvePage() {
     if (!timelineState.isActive) return;
 
     const handleTouchStart = (e: TouchEvent) => {
-      // Record the starting Y position of the first touch
+      const targetElement = e.target as HTMLElement;
+
+      // If the touch starts on a button, ignore it for swipe tracking.
+      // This allows the button's own click/tap event to proceed without interference.
+      if (targetElement.closest("button")) {
+        return;
+      }
+
+      // If the touch was NOT on a button, proceed with tracking the potential swipe.
       if (e.touches.length > 0) {
         touchStartY.current = e.touches[0].clientY;
       }
     };
 
     const handleTouchMove = (e: TouchEvent) => {
-      // If we don't have a starting point, do nothing
       if (touchStartY.current === null || e.touches.length === 0) {
         return;
       }
 
-      // Prevent the browser from scrolling the page
-      e.preventDefault();
-
       const currentY = e.touches[0].clientY;
       const deltaY = currentY - touchStartY.current;
-
-      // Set a threshold to avoid accidental micro-swipes
       const swipeThreshold = 5;
 
+      // Only prevent default and treat as a swipe IF the threshold is met
       if (Math.abs(deltaY) > swipeThreshold) {
-        // Determine direction (swiping finger down scrolls forward, up scrolls reverse)
+        // MOVED HERE: Now it only prevents scrolling during a real swipe
+        e.preventDefault();
+
         const direction = deltaY > 0 ? "reverse" : "forward";
         setScrollDirection(direction);
 
-        // Reset the start position to make the scrolling continuous
         touchStartY.current = currentY;
 
-        // Clear any existing timeout to keep the animation running
         if (scrollTimeoutRef.current) {
           clearTimeout(scrollTimeoutRef.current);
         }
 
-        // Set a timeout to pause the animation when the user stops swiping
         scrollTimeoutRef.current = setTimeout(() => {
           setScrollDirection("paused");
-        }, 300); // A shorter timeout feels more responsive on touch
+        }, 300);
       }
     };
 
@@ -718,7 +720,7 @@ export function TimelineManualSolvePage() {
           style={{ zIndex: 100 }}
         >
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/#section2")}
             className="group h-12 w-12 sm:h-14 sm:w-14 bg-white/25 backdrop-blur-md rounded-full shadow-lg transition-all duration-300 ease-in-out flex items-center justify-center hover:bg-white/35 hover:scale-105 active:scale-95"
             title="Go Back Home"
           >
@@ -860,7 +862,7 @@ export function TimelineManualSolvePage() {
 
       {/* UNIFIED CONTAINER FOR BUTTON AND WARNING */}
       <div
-        className="absolute bottom-[calc(3rem+env(safe-area-inset-bottom))] sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col-reverse items-center gap-3 w-full px-4"
+        className="absolute bottom-[calc(3rem+env(safe-area-inset-bottom))] sm:bottom-8 left-1/2 -translate-x-1/2 flex flex-col-reverse items-center gap-3 w-full px-4 pointer-events-none" // <-- ADD pointer-events-none HERE
         style={{ zIndex: 100 }}
       >
         {/* Solve / Stop Buttons */}

@@ -813,7 +813,7 @@ export function TimelineManualSolvePage() {
 
       {timelineState.isActive && (
         <div
-          className="absolute bottom-[calc(3rem+env(safe-area-inset-bottom))] sm:bottom-12 right-4 sm:right-6 z-50"
+          className="absolute bottom-[calc(3rem+env(safe-area-inset-bottom))] sm:bottom-12 right-4 sm:right-6 z-50 pointer-events-auto"
           style={{ zIndex: 100 }}
         >
           <button
@@ -866,7 +866,7 @@ export function TimelineManualSolvePage() {
         style={{ zIndex: 100 }}
       >
         {/* Solve / Stop Buttons */}
-        <div className="flex gap-3 sm:gap-6">
+        <div className="flex gap-3 sm:gap-6 pointer-events-auto">
           {isComplete &&
             warnings.length === 0 &&
             !timelineState.isActive &&

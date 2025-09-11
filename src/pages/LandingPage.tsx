@@ -508,7 +508,7 @@ export default function CubeCanvasLanding() {
   return (
     <div className="w-full min-h-screen bg-[#EF7722] relative">
       {/* First Container: Cube Canvas */}
-      <div className="relative w-full h-screen overflow-hidden flex flex-col items-center justify-center cube-container">
+      <div className="relative w-full h-screen flex flex-col items-center justify-center cube-container">
         <BackgroundParticles
           isActive={true}
           particleCount={screenSize.width < 768 ? 75 : 150}

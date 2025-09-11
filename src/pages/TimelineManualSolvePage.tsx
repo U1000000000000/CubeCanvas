@@ -354,7 +354,7 @@ export function TimelineManualSolvePage() {
       const { cubies } = useManualCubeStore.getState();
       const cubeString = generateCubeString(cubies);
 
-      const worker = new Worker("/src/services/solver.js");
+      const worker = new Worker("solver.js");
 
       worker.onmessage = (e) => {
         const { type, result, error } = e.data;

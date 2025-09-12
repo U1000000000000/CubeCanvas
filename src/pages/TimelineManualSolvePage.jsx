@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { TimelineManualCube } from "../components/manual/TimelineManualCube";
 import { useManualCubeStore } from "../store/manualCubeStore";
-import { CubeColor } from "../types/cube";
 import { useTimelineAnimation } from "../hooks/useTimelineAnimation";
 import { BackgroundParticles } from "../components/manual/BackgroundParticles";
 import {
@@ -21,7 +20,7 @@ import {
   Home,
 } from "lucide-react";
 
-const COLORS: CubeColor[] = [
+const COLORS = [
   "white",
   "yellow",
   "red",
@@ -30,7 +29,7 @@ const COLORS: CubeColor[] = [
   "blue",
 ];
 
-const COLOR_HEX_MAP: Record<CubeColor, string> = {
+const COLOR_HEX_MAP = {
   white: "#FFFFFF",
   yellow: "#FFD700",
   red: "#C41E3A",
@@ -41,9 +40,9 @@ const COLOR_HEX_MAP: Record<CubeColor, string> = {
 
 export function TimelineManualSolvePage() {
   const navigate = useNavigate();
-  const [selectedColor, setSelectedColor] = useState<CubeColor>("white");
+  const [selectedColor, setSelectedColor] = useState("white");
   const [isComplete, setIsComplete] = useState(false);
-  const [solution, setSolution] = useState<string>("");
+  const [solution, setSolution] = useState("");
   const [videoControlEnabled, setVideoControlEnabled] = useState(true);
   const [showInstructions, setShowInstructions] = useState(false);
 
@@ -62,18 +61,18 @@ export function TimelineManualSolvePage() {
   });
 
   const [isSolving, setIsSolving] = useState(false);
-  const [warnings, setWarnings] = useState<string[]>([]);
-  const [tempWarning, setTempWarning] = useState<string | null>(null);
+  const [warnings, setWarnings] = useState([]);
+  const [tempWarning, setTempWarning] = useState(null);
 
   const [particlesVisible, setParticlesVisible] = useState(true);
 
   const [scrollInfo, setScrollInfo] = useState({
-    direction: "paused" as "forward" | "reverse" | "paused",
-    type: null as "wheel" | "touch" | null,
+    direction: "paused",
+    type: null,
   });
-  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
-  const instructionTimeoutRef = useRef<NodeJS.Timeout>();
-  const touchStartY = useRef<number | null>(null);
+  const scrollTimeoutRef = useRef();
+  const instructionTimeoutRef = useRef();
+  const touchStartY = useRef(null);
 
   useEffect(() => {
     if (
@@ -129,7 +128,7 @@ export function TimelineManualSolvePage() {
 
   // Keyboard event listener for arrow keys
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    const handleKeyDown = (e) => {
       if (e.code === "ArrowUp" || e.code === "ArrowDown") {
         e.preventDefault();
 
@@ -161,7 +160,7 @@ export function TimelineManualSolvePage() {
       }
     };
 
-    const handleKeyUp = (e: KeyboardEvent) => {
+    const handleKeyUp = (e) => {
       if (
         (e.code === "ArrowUp" || e.code === "ArrowDown") &&
         timelineState.isActive
@@ -194,7 +193,7 @@ export function TimelineManualSolvePage() {
 
   // Wheel event listener for desktop scrolling
   useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
+    const handleWheel = (e) => {
       if (timelineState.isActive) {
         // Prevent default scrolling behavior
         e.preventDefault();
@@ -235,8 +234,8 @@ export function TimelineManualSolvePage() {
     // Only run this logic when the timeline is active
     if (!timelineState.isActive) return;
 
-    const handleTouchStart = (e: TouchEvent) => {
-      const targetElement = e.target as HTMLElement;
+    const handleTouchStart = (e) => {
+      const targetElement = e.target;
 
       // If the touch starts on a button, ignore it for swipe tracking.
       // This allows the button's own click/tap event to proceed without interference.
@@ -250,7 +249,7 @@ export function TimelineManualSolvePage() {
       }
     };
 
-    const handleTouchMove = (e: TouchEvent) => {
+    const handleTouchMove = (e) => {
       if (touchStartY.current === null || e.touches.length === 0) {
         return;
       }
@@ -316,13 +315,13 @@ export function TimelineManualSolvePage() {
   useEffect(() => {
     if (!cubies.length || isAnimating || timelineState.isActive) return;
 
-    const newWarnings: string[] = [];
+    const newWarnings = [];
 
     const anyIncomplete = cubies.some((cubie) => {
       const faces = cubie.materials;
       if (!faces) return true;
       const { x, y, z } = cubie.position;
-      const visibleFaces: number[] = [];
+      const visibleFaces = [];
       if (x === 1) visibleFaces.push(0);
       if (x === -1) visibleFaces.push(1);
       if (y === 1) visibleFaces.push(2);
@@ -336,7 +335,7 @@ export function TimelineManualSolvePage() {
       newWarnings.push("Color all faces before solving");
     }
 
-    const colorCounts: Record<CubeColor, number> = {
+    const colorCounts = {
       white: 0,
       yellow: 0,
       red: 0,
@@ -355,7 +354,7 @@ export function TimelineManualSolvePage() {
       });
     });
 
-    (Object.keys(colorCounts) as CubeColor[]).forEach((color) => {
+    Object.keys(colorCounts).forEach((color) => {
       if (color !== "gray" && color !== "black" && colorCounts[color] > 9) {
         newWarnings.push(
           `${color.toUpperCase()} appears ${colorCounts[color]} times (max 9)`
@@ -368,7 +367,7 @@ export function TimelineManualSolvePage() {
   }, [cubies, isAnimating, timelineState.isActive]);
 
   useEffect(() => {
-    const handleWheelPrevention = (e: WheelEvent) => {
+    const handleWheelPrevention = (e) => {
       if (timelineState.isActive) {
         if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
           e.preventDefault();
@@ -394,7 +393,7 @@ export function TimelineManualSolvePage() {
       const faces = cubie.materials;
       if (!faces) return true;
       const { x, y, z } = cubie.position;
-      const visibleFaces: number[] = [];
+      const visibleFaces = [];
       if (x === 1) visibleFaces.push(0);
       if (x === -1) visibleFaces.push(1);
       if (y === 1) visibleFaces.push(2);
@@ -406,7 +405,7 @@ export function TimelineManualSolvePage() {
     setIsComplete(!anyIncomplete);
   }, [cubies, isAnimating, timelineState.isActive]);
 
-  const handleStickerClick = (cubieId: string, faceIndex: number) => {
+  const handleStickerClick = (cubieId, faceIndex) => {
     if (isAnimating || timelineState.isActive) return;
     const { cubies: currentCubies } = useManualCubeStore.getState();
     const clickedCubie = currentCubies.find((c) => c.id === cubieId);
@@ -435,82 +434,6 @@ export function TimelineManualSolvePage() {
     });
     useManualCubeStore.setState({ cubies: updatedCubies });
   };
-
-  // const solveCube = async () => {
-  //   if (!isComplete) return;
-  //   setIsSolving(true);
-
-  //   try {
-  //     const { cubies } = useManualCubeStore.getState();
-  //     const cubeString = generateCubeString(cubies);
-
-  //     const worker = new Worker("solver.js");
-
-  //     worker.onmessage = (e) => {
-  //       const { type, result, error } = e.data;
-
-  //       if (type === "CoordCube") {
-  //         worker.postMessage({
-  //           type: "solve",
-  //           cube: cubeString,
-  //           maxDepth: 24,
-  //           maxTime: 15,
-  //         });
-  //       }
-
-  //       if (type === "solution") {
-  //         if (
-  //           result &&
-  //           typeof result === "string" &&
-  //           result.startsWith("Error")
-  //         ) {
-  //           const errorMatch = result.match(/Error (\d+)/);
-  //           const errorCode = errorMatch ? parseInt(errorMatch[1]) : null;
-
-  //           let errorMessage = "Solver encountered an issue";
-
-  //           if (errorCode >= 1 && errorCode <= 6) {
-  //             errorMessage = "Invalid cube";
-  //           } else if (errorCode === 7) {
-  //             errorMessage = "Solution complexity exceeded";
-  //           } else if (errorCode === 8) {
-  //             errorMessage = "Solver timeout";
-  //           }
-
-  //           setTempWarning(errorMessage);
-  //           setTimeout(() => setTempWarning(null), 2000);
-  //           setIsSolving(false);
-  //           worker.terminate();
-  //           return;
-  //         }
-
-  //         setSolution(result);
-  //         setIsSolving(false);
-  //         worker.terminate();
-  //       }
-
-  //       if (type === "error") {
-  //         setTempWarning(`Solver error: ${error || "Unknown error"}`);
-  //         setTimeout(() => setTempWarning(null), 2000);
-  //         setIsSolving(false);
-  //         worker.terminate();
-  //       }
-  //     };
-
-  //     worker.onerror = (err) => {
-  //       setTempWarning("Solver worker failed to load");
-  //       setTimeout(() => setTempWarning(null), 2000);
-  //       setIsSolving(false);
-  //     };
-
-  //     worker.postMessage({ type: "generateTables" });
-  //   } catch (err) {
-  //     setTempWarning("Failed to initialize solver");
-  //     setTimeout(() => setTempWarning(null), 2000);
-  //     setIsSolving(false);
-  //   }
-  // };
-
 
   const solveCube = async () => {
     if (!isComplete) return;
@@ -561,9 +484,8 @@ export function TimelineManualSolvePage() {
     }
   };
 
-
-  function generateCubeString(cubies: any[]): string {
-    const colorToFaceMap: Record<CubeColor, string> = {
+  function generateCubeString(cubies) {
+    const colorToFaceMap = {
       white: "U",
       orange: "L",
       green: "F",
@@ -574,7 +496,7 @@ export function TimelineManualSolvePage() {
       black: "?",
     };
 
-    const faces: Record<string, string[]> = {
+    const faces = {
       U: new Array(9).fill("?"),
       R: new Array(9).fill("?"),
       F: new Array(9).fill("?"),
@@ -583,7 +505,7 @@ export function TimelineManualSolvePage() {
       B: new Array(9).fill("?"),
     };
 
-    const get1DIndex = (row: number, col: number): number => {
+    const get1DIndex = (row, col) => {
       return row * 3 + col;
     };
 
@@ -674,7 +596,7 @@ export function TimelineManualSolvePage() {
     useManualCubeStore.getState().reset();
   };
 
-  const handleTimelineSeek = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleTimelineSeek = (event) => {
     if (!timelineState.isActive) return;
     const rect = event.currentTarget.getBoundingClientRect();
     const clickX = event.clientX - rect.left;
@@ -685,7 +607,6 @@ export function TimelineManualSolvePage() {
 
   const currentFrame = timelineState.currentFrame;
   const rotationState = currentFrame?.rotationState;
-
 
   return (
     <div
@@ -857,7 +778,7 @@ export function TimelineManualSolvePage() {
         >
           <Atom
             size={20}
-            className={`sm:w-极 sm:h-6 transition-all duration-300 ${
+            className={`sm:w-6 sm:h-6 transition-all duration-300 ${
               particlesVisible ? "opacity-80" : "opacity-50"
             } text-black`}
             strokeWidth={2}
@@ -1051,7 +972,7 @@ export function TimelineManualSolvePage() {
           className="absolute top-4 sm:top-6 left-1/2 -translate-x-1/2 z-40"
           style={{ zIndex: 100 }}
         >
-          <div className="flex gap-1 sm:gap-2 bg-white/20 backdrop-blur-md rounded-full px-2 sm:px-4 py-1 sm:py-2 shadow-lg max-w-[70vw] sm:极-w-md overflow-x-auto scrollbar-hide">
+          <div className="flex gap-1 sm:gap-2 bg-white/20 backdrop-blur-md rounded-full px-2 sm:px-4 py-1 sm:py-2 shadow-lg max-w-[70vw] sm:max-w-md overflow-x-auto scrollbar-hide">
             {solution.split(" ").map((move, index) => {
               const currentLogicalMoveIndex =
                 timelineState.currentLogicalMoveIndex;

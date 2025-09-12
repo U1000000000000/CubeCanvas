@@ -1,11 +1,5 @@
-import { CubeColor } from '../types/cube';
-
 // Rotate materials array for a cubie based on rotation axis and direction
-export function rotateMaterialsClockwise(
-  axis: 'x' | 'y' | 'z',
-  materials: CubeColor[],
-  clockwise: boolean = true
-): CubeColor[] {
+export function rotateMaterialsClockwise(axis, materials, clockwise = true) {
   // Validate input
   if (!materials || materials.length !== 6) {
     console.error('Invalid materials array for rotation:', materials);
@@ -21,7 +15,7 @@ export function rotateMaterialsClockwise(
   }
   
   // Create a deep copy to prevent mutation
-  const newMaterials: CubeColor[] = [...materials];
+  const newMaterials = [...materials];
   
   if (axis === 'x') {
     // Rotating around X-axis affects Y and Z faces
@@ -81,7 +75,7 @@ export function rotateMaterialsClockwise(
 }
 
 // Get rotation axis for each face
-export function getFaceRotationAxis(face: string): 'x' | 'y' | 'z' {
+export function getFaceRotationAxis(face) {
   switch (face) {
     case 'U':
     case 'D':
@@ -98,7 +92,7 @@ export function getFaceRotationAxis(face: string): 'x' | 'y' | 'z' {
 }
 
 // 🔥 CRITICAL FIX: Corrected rotation direction logic
-export function getFaceRotationDirection(face: string, clockwise: boolean): number {
+export function getFaceRotationDirection(face, clockwise) {
   const baseDirection = clockwise ? 1 : -1;
   
   // FIXED: Only L face needs direction inversion for proper visual rotation
@@ -116,11 +110,7 @@ export function getFaceRotationDirection(face: string, clockwise: boolean): numb
 }
 
 // Rotate a 3D position around an axis
-export function rotatePosition(
-  position: { x: number; y: number; z: number },
-  axis: 'x' | 'y' | 'z',
-  clockwise: boolean
-): { x: number; y: number; z: number } {
+export function rotatePosition(position, axis, clockwise) {
   // Validate input position
   if (!position || typeof position.x !== 'number' || 
       typeof position.y !== 'number' || typeof position.z !== 'number') {
@@ -148,11 +138,8 @@ export function rotatePosition(
 }
 
 // Get cubies that belong to a specific face
-export function getCubiesOnFace(
-  cubies: any[],
-  face: string
-): any[] {
-  const faceConditions: Record<string, (cubie: any) => boolean> = {
+export function getCubiesOnFace(cubies, face) {
+  const faceConditions = {
     U: (cubie) => cubie.position.y === 1,
     D: (cubie) => cubie.position.y === -1,
     L: (cubie) => cubie.position.x === -1,

@@ -1,9 +1,6 @@
 import { useEffect, useRef, useCallback, useState } from "react";
 import { useManualCubeStore } from "../store/manualCubeStore";
-import { parseMoves } from "../utils/simpleSolver";
-import { Move, CubieState, Face, CubeColor } from "../types/cube";
 import { Vector3, Spherical } from "three";
-import { log } from "console";
 
 // --- ENHANCED ANIMATION SETTINGS FOR SMOOTH 60FPS ---
 const ENHANCED_ANIMATION_CONFIG = {
@@ -16,13 +13,13 @@ const ENHANCED_ANIMATION_CONFIG = {
 
 // Professional easing functions for smooth animations
 const EASING_FUNCTIONS = {
-  easeInOutCubic: (t: number): number => {
+  easeInOutCubic: (t) => {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   },
-  easeOutQuart: (t: number): number => {
+  easeOutQuart: (t) => {
     return 1 - Math.pow(1 - t, 4);
   },
-  easeInOutQuint: (t: number): number => {
+  easeInOutQuint: (t) => {
     return t < 0.5 ? 16 * t * t * t * t * t : 1 - Math.pow(-2 * t + 2, 5) / 2;
   },
 };
@@ -36,7 +33,7 @@ const QUALITY_PRESETS = {
 };
 
 // Cube rotation presets for each face
-const CUBE_ROTATIONS: Record<Face, { x: number; y: number; z: number }> = {
+const CUBE_ROTATIONS = {
   F: { x: 0, y: 0, z: 0 },
   B: { x: 0, y: Math.PI, z: 0 },
   R: { x: 0, y: Math.PI / 2, z: 0 },
@@ -45,63 +42,9 @@ const CUBE_ROTATIONS: Record<Face, { x: number; y: number; z: number }> = {
   D: { x: -Math.PI / 2, y: 0, z: 0 },
 };
 
-// --- Types ---
-interface CameraFrame {
-  position: Vector3;
-  lookAt: Vector3;
-  progress: number;
-}
-
-interface CubeRotationFrame {
-  progress: number;
-  targetRotation: { x: number; y: number; z: number };
-  currentRotation: { x: number; y: number; z: number };
-}
-
-interface TimelineFrame {
-  timestamp: number;
-  moveIndex: number;
-  logicalMoveIndex: number;
-  frameType: "camera_transition" | "rotation" | "idle";
-  rotationState: {
-    face: Face | null;
-    axis: "x" | "y" | "z" | null;
-    angle: number;
-    progress: number;
-    cubieIds: string[];
-    easedProgress?: number;
-  };
-  cameraFrame?: CameraFrame;
-  cubeRotation?: CubeRotationFrame;
-  cubeState: CubieState[];
-}
-
-interface UseTimelineAnimationOptions {
-  solution: string;
-  onComplete?: () => void;
-  onStart?: () => void;
-  enabled?: boolean;
-  animationQuality?: "low" | "medium" | "high" | "ultra";
-  customFramesPerMove?: number;
-  customCameraFrames?: number;
-  enableEasing?: boolean;
-}
-
-interface TimelineAnimationState {
-  isActive: boolean;
-  currentFrame: TimelineFrame | null;
-  totalFrames: number;
-  progress: number;
-  currentMoveIndex: number;
-  totalMoves: number;
-  isAtStart: boolean;
-  isAtEnd: boolean;
-  currentLogicalMoveIndex: number;
-}
-
 // --- Constants ---
 const CAMERA_DISTANCE = 10;
-const FACE_CAMERA_POSITIONS: Record<Face, Vector3> = {
+const FACE_CAMERA_POSITIONS = {
   F: new Vector3(2, 2, CAMERA_DISTANCE),
   B: new Vector3(-2, 2, -CAMERA_DISTANCE),
   R: new Vector3(CAMERA_DISTANCE, 2, 2),
@@ -113,60 +56,60 @@ const INITIAL_CAMERA_POSITION = new Vector3(5, 5, 5);
 const EPS = 1e-2;
 
 // --- Helpers ---
-function getFaceRotationAxis(face: Face): "x" | "y" | "z" {
+function getFaceRotationAxis(face) {
   switch (face) {
-    case "U":
-    case "D":
-      return "y";
-    case "L":
-    case "R":
-      return "x";
-    case "F":
-    case "B":
-      return "z";
+    case 'U':
+    case 'D':
+      return 'y';
+    case 'L':
+    case 'R':
+      return 'x';
+    case 'F':
+    case 'B':
+      return 'z';
   }
 }
 
-// 🔥 CRITICAL FIX: Match the exact rotation direction logic from rotationUtils.ts
-function getFaceRotationDirection(face: Face, clockwise: boolean): number {
+// 🔥 CRITICAL FIX: Match the exact rotation direction logic from rotationUtils.js
+function getFaceRotationDirection(face, clockwise) {
   const baseDirection = clockwise ? 1 : -1;
 
   switch (face) {
-    case "L":
+    case 'L':
       return -baseDirection;
 
-    case "B":
+    case 'B':
       return clockwise ? -1 : 1;
 
-    case "D":
+    case 'D':
       return clockwise ? -1 : 1;
 
-    case "U":
-    case "R":
-    case "F":
+    case 'U':
+    case 'R':
+    case 'F':
     default:
       return baseDirection;
   }
 }
 
-function getCubiesOnFace(cubies: CubieState[], face: Face): string[] {
+function getCubiesOnFace(cubies, face) {
   return cubies
     .filter(({ position: { x, y, z } }) => {
       const rx = Math.round(x);
       const ry = Math.round(y);
       const rz = Math.round(z);
       switch (face) {
-        case "U":
+        case 'U':
           return ry === 1;
-        case "D":
+        case 'D':
           return ry === -1;
-        case "L":
+        case 'L':
           return rx === -1;
-        case "R":
+        case 'R':
           return rx === 1;
-        case "F":
+        case 'F':
           return rz === 1;
-        case "B":
+        case 'B':
           return rz === -1;
         default:
           return false;
@@ -175,8 +118,8 @@ function getCubiesOnFace(cubies: CubieState[], face: Face): string[] {
     .map((c) => c.id);
 }
 
-function expandMoves(moves: Move[]): Move[] {
-  const out: Move[] = [];
+function expandMoves(moves) {
+  const out = [];
   for (const m of moves) {
     if (m.double) {
       out.push({ face: m.face, clockwise: m.clockwise, double: false });
@@ -188,33 +131,25 @@ function expandMoves(moves: Move[]): Move[] {
   return out;
 }
 
-function rotatePositionPure(
-  pos: { x: number; y: number; z: number },
-  axis: "x" | "y" | "z",
-  clockwise: boolean
-) {
+function rotatePositionPure(pos, axis, clockwise) {
   const { x, y, z } = pos;
-  if (axis === "x") {
+  if (axis === 'x') {
     return clockwise ? { x, y: -z, z: y } : { x, y: z, z: -y };
-  } else if (axis === "y") {
+  } else if (axis === 'y') {
     return clockwise ? { x: z, y, z: -x } : { x: -z, y, z: x };
   } else {
     return clockwise ? { x: -y, y: x, z } : { x: y, y: -x, z };
   }
 }
 
-function rotateMaterialsPure(
-  axis: "x" | "y" | "z",
-  materials: CubeColor[],
-  clockwise = true
-): CubeColor[] {
+function rotateMaterialsPure(axis, materials, clockwise = true) {
   if (!materials || materials.length !== 6) {
     return materials || ["gray", "gray", "gray", "gray", "gray", "gray"];
   }
 
   const m = [...materials];
 
-  if (axis === "x") {
+  if (axis === 'x') {
     if (clockwise) {
       const t = m[2];
       m[2] = m[5];
@@ -228,7 +163,7 @@ function rotateMaterialsPure(
       m[3] = m[5];
       m[5] = t;
     }
-  } else if (axis === "y") {
+  } else if (axis === 'y') {
     if (clockwise) {
       const t = m[0];
       m[0] = m[4];
@@ -242,7 +177,7 @@ function rotateMaterialsPure(
       m[1] = m[4];
       m[4] = t;
     }
-  } else if (axis === "z") {
+  } else if (axis === 'z') {
     if (clockwise) {
       const t = m[0];
       m[0] = m[3];
@@ -262,7 +197,7 @@ function rotateMaterialsPure(
 }
 
 // 🔥 CRITICAL FIX: Use the same rotation direction calculation as manual store
-function applyMovePure(cubies: CubieState[], move: Move): CubieState[] {
+function applyMovePure(cubies, move) {
   const axis = getFaceRotationAxis(move.face);
   const rotationCount = move.double ? 2 : 1;
 
@@ -276,12 +211,12 @@ function applyMovePure(cubies: CubieState[], move: Move): CubieState[] {
     result = result.map((cubie) => {
       const { x, y, z } = cubie.position;
       const isRotating =
-        (move.face === "U" && Math.round(y) === 1) ||
-        (move.face === "D" && Math.round(y) === -1) ||
-        (move.face === "L" && Math.round(x) === -1) ||
-        (move.face === "R" && Math.round(x) === 1) ||
-        (move.face === "F" && Math.round(z) === 1) ||
-        (move.face === "B" && Math.round(z) === -1);
+        (move.face === 'U' && Math.round(y) === 1) ||
+        (move.face === 'D' && Math.round(y) === -1) ||
+        (move.face === 'L' && Math.round(x) === -1) ||
+        (move.face === 'R' && Math.round(x) === 1) ||
+        (move.face === 'F' && Math.round(z) === 1) ||
+        (move.face === 'B' && Math.round(z) === -1);
 
       if (!isRotating) return cubie;
 
@@ -315,14 +250,14 @@ function applyMovePure(cubies: CubieState[], move: Move): CubieState[] {
   return result;
 }
 
-function parseMoves(solution: string): Move[] {
-  const moves: Move[] = [];
+function parseMoves(solution) {
+  const moves = [];
   const tokens = solution.trim().split(/\s+/);
 
   for (const token of tokens) {
     if (!token) continue;
 
-    const face = token[0] as Face;
+    const face = token[0];
     const isPrime = token.includes("'");
     const isDouble = token.includes("2");
 
@@ -342,11 +277,7 @@ function parseMoves(solution: string): Move[] {
 }
 
 // Spherical interpolation for smoother camera movement
-const sphericalInterpolation = (
-  start: Vector3,
-  end: Vector3,
-  progress: number
-): Vector3 => {
+const sphericalInterpolation = (start, end, progress) => {
   const startSpherical = new Spherical().setFromVector3(start);
   const endSpherical = new Spherical().setFromVector3(end);
 
@@ -362,21 +293,12 @@ const sphericalInterpolation = (
 };
 
 // --- Enhanced Timeline Generation ---
-function generateEnhancedTimelineFrames(
-  moves: Move[],
-  startState: CubieState[],
-  logicalToAtomic: number[],
-  options: {
-    framesPerMove: number;
-    cameraTransitionFrames: number;
-    enableEasing: boolean;
-  }
-): TimelineFrame[] {
-  const frames: TimelineFrame[] = [];
+function generateEnhancedTimelineFrames(moves, startState, logicalToAtomic, options) {
+  const frames = [];
   let currentCameraPosition = INITIAL_CAMERA_POSITION.clone();
   let currentCubeRotation = { x: 0, y: 0, z: 0 };
 
-  const cubeStates: CubieState[][] = [
+  const cubeStates = [
     startState.map((c) => ({
       ...c,
       materials: [...c.materials],
@@ -442,7 +364,7 @@ function generateEnhancedTimelineFrames(
   });
 
   let currentFrameIndex = 1;
-  let lastFace: Face | null = null;
+  let lastFace = null;
 
   for (let moveIndex = 0; moveIndex < moves.length; moveIndex++) {
     const move = moves[moveIndex];
@@ -601,17 +523,17 @@ export function useTimelineAnimation({
   customFramesPerMove,
   customCameraFrames,
   enableEasing = true,
-}: UseTimelineAnimationOptions) {
+}) {
   const [isActive, setIsActive] = useState(false);
   const [currentTimestamp, setCurrentTimestamp] = useState(0);
-  const [frames, setFrames] = useState<TimelineFrame[]>([]);
-  const [initialState, setInitialState] = useState<CubieState[]>([]);
+  const [frames, setFrames] = useState([]);
+  const [initialState, setInitialState] = useState([]);
 
   const timelineRef = useRef(0);
   const targetTimestampRef = useRef(0);
-  const animationFrameRef = useRef<number>();
-  const movesRef = useRef<Move[]>([]);
-  const logicalToAtomicRef = useRef<number[]>([]);
+  const animationFrameRef = useRef();
+  const movesRef = useRef([]);
+  const logicalToAtomicRef = useRef([]);
 
   const animationSettings = {
     framesPerMove:
@@ -652,7 +574,7 @@ export function useTimelineAnimation({
       movesRef.current = atomicMoves;
 
       // NEW: Keep logical-to-atomic mapping
-      const logicalToAtomic: number[] = [];
+      const logicalToAtomic = [];
       parsedMoves.forEach((move) => {
         if (move.double) {
           logicalToAtomic.push(2); // 2 atomic moves for U2
@@ -690,7 +612,7 @@ export function useTimelineAnimation({
   ]);
 
   const handleScroll = useCallback(
-    (e: WheelEvent) => {
+    (e) => {
       if (!enabled || !isActive || !frames.length) return;
       e.preventDefault();
       e.stopPropagation();
@@ -731,7 +653,7 @@ export function useTimelineAnimation({
   }, [isActive]);
 
   const getCurrentFrame = useCallback(
-    (timestamp: number): TimelineFrame | null => {
+    (timestamp) => {
       if (!frames.length) return null;
       const t = Math.max(0, Math.min(1, timestamp));
 
@@ -753,7 +675,7 @@ export function useTimelineAnimation({
   );
 
   const applyCubeState = useCallback(
-    (timestamp: number) => {
+    (timestamp) => {
       const currentFrame = getCurrentFrame(timestamp);
       if (!currentFrame) return;
 
@@ -788,7 +710,7 @@ export function useTimelineAnimation({
 
   useEffect(() => {
     if (!enabled || !isActive) return;
-    const handleWheel = (ev: WheelEvent) => handleScroll(ev);
+    const handleWheel = (ev) => handleScroll(ev);
     document.addEventListener("wheel", handleWheel, {
       passive: false,
       capture: true,
@@ -846,7 +768,7 @@ export function useTimelineAnimation({
   }, [initialState]);
 
   const jumpToTimestamp = useCallback(
-    (t: number) => {
+    (t) => {
       const clampedT = Math.max(0, Math.min(1, t));
       targetTimestampRef.current = clampedT;
       if (clampedT >= 1) {
@@ -863,7 +785,7 @@ export function useTimelineAnimation({
   const TOUCH_SCRUB_SPEED = 0.05; 
 
   const scrubTimeline = useCallback(
-    (direction: "forward" | "reverse", inputType: "wheel" | "touch") => {
+    (direction, inputType) => {
       if (!isActive) return;
 
       const speed =
@@ -887,7 +809,7 @@ export function useTimelineAnimation({
   const isAtStart = currentTimestamp <= 0;
   const isAtEnd = currentTimestamp >= 1;
 
-  const state: TimelineAnimationState = {
+  const state = {
     isActive,
     currentFrame,
     totalFrames: frames.length,

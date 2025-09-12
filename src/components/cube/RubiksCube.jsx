@@ -17,10 +17,9 @@ import {
   getFaceRotationAxis,
   getFaceRotationDirection,
 } from "../../utils/rotationUtils";
-import { Face } from "../../types/cube";
 
 // Helper functions for direction mapping
-const rotateDirection = (dir: string, steps: number): string => {
+const rotateDirection = (dir, steps) => {
   const directions = ["up", "right", "down", "left"];
   const index = directions.indexOf(dir);
   const newIndex = (index + steps + 4) % 4;
@@ -28,13 +27,9 @@ const rotateDirection = (dir: string, steps: number): string => {
 };
 
 // IMPROVED: Camera-aware rotation direction calculation
-function getRotationDirectionFromDrag(
-  face: Face,
-  dragDirection: "up" | "down" | "left" | "right",
-  camera: Camera
-): boolean {
+function getRotationDirectionFromDrag(face, dragDirection, camera) {
   // Get the face normal in world space
-  const faceNormals: Record<Face, Vector3> = {
+  const faceNormals = {
     F: new Vector3(0, 0, 1),
     B: new Vector3(0, 0, -1),
     L: new Vector3(-1, 0, 0),
@@ -44,7 +39,7 @@ function getRotationDirectionFromDrag(
   };
 
   // Get the face's local coordinate system
-  const faceAxes: Record<Face, { up: Vector3; right: Vector3 }> = {
+  const faceAxes = {
     F: { up: new Vector3(0, 1, 0), right: new Vector3(1, 0, 0) },
     B: { up: new Vector3(0, 1, 0), right: new Vector3(-1, 0, 0) },
     U: { up: new Vector3(0, 0, -1), right: new Vector3(1, 0, 0) },
@@ -57,7 +52,7 @@ function getRotationDirectionFromDrag(
   const { up: faceUp, right: faceRight } = faceAxes[face];
 
   // Project the face's up and right vectors to screen space
-  const projectToScreen = (worldVector: Vector3): Vector2 => {
+  const projectToScreen = (worldVector) => {
     const vector = worldVector.clone();
     vector.project(camera);
     return new Vector2(vector.x, vector.y);
@@ -88,7 +83,7 @@ function getRotationDirectionFromDrag(
   const rightDot = dragVector.dot(screenRight);
 
   // Create a rotation vector in face space based on the drag
-  let faceSpaceRotation: Vector3;
+  let faceSpaceRotation;
 
   if (Math.abs(upDot) > Math.abs(rightDot)) {
     // Dragging along the face's vertical axis
@@ -119,7 +114,7 @@ function getRotationDirectionFromDrag(
 }
 
 // Helper function to get the rotation axis as a Vector3
-function getFaceRotationAxisVector(face: Face): Vector3 {
+function getFaceRotationAxisVector(face) {
   switch (face) {
     case "F":
     case "B":
@@ -136,18 +131,14 @@ function getFaceRotationAxisVector(face: Face): Vector3 {
 }
 
 // ALTERNATIVE APPROACH: More intuitive direction mapping
-function getIntuitiveRotationDirection(
-  face: Face,
-  dragDirection: "up" | "down" | "left" | "right",
-  camera: Camera
-): boolean {
+function getIntuitiveRotationDirection(face, dragDirection, camera) {
   // Get camera's forward direction
   const cameraForward = new Vector3(0, 0, -1).applyQuaternion(
     camera.quaternion
   );
 
   // Face normals pointing outward from cube center
-  const faceNormals: Record<Face, Vector3> = {
+  const faceNormals = {
     F: new Vector3(0, 0, 1),
     B: new Vector3(0, 0, -1),
     L: new Vector3(-1, 0, 0),
@@ -202,13 +193,9 @@ function getIntuitiveRotationDirection(
   return shouldFlip ? !baseClockwise : baseClockwise;
 }
 
-const mapDirectionRelativeToFace = (
-  dragDirection: "up" | "down" | "left" | "right",
-  face: Face,
-  camera: Camera
-): "up" | "down" | "left" | "right" => {
+const mapDirectionRelativeToFace = (dragDirection, face, camera) => {
   // Define the local up and right vectors for each face
-  const faceAxes: Record<Face, { up: Vector3; right: Vector3 }> = {
+  const faceAxes = {
     F: { up: new Vector3(0, 1, 0), right: new Vector3(1, 0, 0) },
     B: { up: new Vector3(0, 1, 0), right: new Vector3(-1, 0, 0) },
     U: { up: new Vector3(0, 0, -1), right: new Vector3(1, 0, 0) },
@@ -220,7 +207,7 @@ const mapDirectionRelativeToFace = (
   const { up, right } = faceAxes[face];
 
   // A helper function to project a 3D vector onto the camera's view plane
-  const projectVector = (v: Vector3): Vector2 => {
+  const projectVector = (v) => {
     const vCopy = v.clone();
     const vProjected = vCopy.project(camera);
     return new Vector2(vProjected.x, vProjected.y).normalize();
@@ -231,7 +218,7 @@ const mapDirectionRelativeToFace = (
   const projectedRight = projectVector(right);
 
   // Convert the drag direction string to a 2D vector
-  let dragVector: Vector2;
+  let dragVector;
   switch (dragDirection) {
     case "up":
       dragVector = new Vector2(0, 1);
@@ -258,14 +245,14 @@ const mapDirectionRelativeToFace = (
   }
 };
 
-function getFrontFacingFace(camera: Camera): Face {
+function getFrontFacingFace(camera) {
   const forward = new Vector3(0, 0, -1).applyQuaternion(camera.quaternion);
-  const axes: ("x" | "y" | "z")[] = ["x", "y", "z"];
+  const axes = ["x", "y", "z"];
   const major = axes.reduce((a, b) =>
     Math.abs(forward[a]) > Math.abs(forward[b]) ? a : b
   );
   const sign = Math.sign(forward[major]);
-  const faceMap: Record<string, Face> = {
+  const faceMap = {
     "x+": "L",
     "x-": "R",
     "y+": "D",
@@ -777,14 +764,11 @@ const GESTURE_MATRIX = {
       },
     },
   ],
-} as const;
+};
 
 // Convert 3D cubie position to 2D face matrix position
-function getCubieMatrixPosition(
-  cubiePos: Vector3,
-  face: Face
-): [number, number] | null {
-  let x: number, y: number;
+function getCubieMatrixPosition(cubiePos, face) {
+  let x, y;
 
   switch (face) {
     case "F": // Front face (z = 1)
@@ -825,11 +809,7 @@ function getCubieMatrixPosition(
 }
 
 // Get rotation action based on cubie position and drag direction
-function getRotationFromGesture(
-  frontFace: Face,
-  cubiePos: Vector3,
-  dragDirection: "up" | "down" | "left" | "right"
-): { face: Face; clockwise: boolean } | null {
+function getRotationFromGesture(frontFace, cubiePos, dragDirection) {
   const matrixPos = getCubieMatrixPosition(cubiePos, frontFace);
   if (!matrixPos) return null;
 
@@ -847,8 +827,8 @@ function getRotationFromGesture(
 }
 
 function CubeGroup() {
-  const groupRef = useRef<Group>(null);
-  const animationGroupRef = useRef<Group>(null);
+  const groupRef = useRef(null);
+  const animationGroupRef = useRef(null);
   const {
     cubies,
     isAnimating,
@@ -859,7 +839,7 @@ function CubeGroup() {
   } = useCubeStore();
   const animationProgressRef = useRef(0);
   const animationStartTimeRef = useRef(0);
-  const currentRotationRef = useRef<{ face: Face; clockwise: boolean }>({
+  const currentRotationRef = useRef({
     face: "F",
     clockwise: true,
   });
@@ -870,8 +850,8 @@ function CubeGroup() {
   );
 
   // Function to determine which cubies belong to a face
-  const getCubiesForFace = (face: Face): string[] => {
-    const cubieIds: string[] = [];
+  const getCubiesForFace = (face) => {
+    const cubieIds = [];
 
     validCubies.forEach((cubie) => {
       const { x, y, z } = cubie.position;
@@ -963,7 +943,7 @@ function CubeGroup() {
       // Use a small delay to ensure state update completes before visual transition
       setTimeout(() => {
         // Then reset animation group rotation
-        animationGroupRef.current!.rotation.set(0, 0, 0);
+        animationGroupRef.current.rotation.set(0, 0, 0);
 
         // Then signal cubies to return to main group
         setAnimatingCubies([]);
@@ -1006,17 +986,17 @@ function CubeGroup() {
   );
 }
 
-function FaceDetector({ controlsRef }: { controlsRef: React.RefObject<any> }) {
+function FaceDetector({ controlsRef }) {
   const { camera, scene, gl } = useThree();
   const raycaster = useRef(new Raycaster()).current;
   const pointer = useRef(new Vector2()).current;
 
-  const dragInfo = useRef<{ startPos: Vector2; cubieData: any } | null>(null);
+  const dragInfo = useRef(null);
   const isDragging = useRef(false);
   const isInteracting = useRef(false);
 
-  const getCubieFaces = (position: Vector3): Face[] => {
-    const faces: Face[] = [];
+  const getCubieFaces = (position) => {
+    const faces = [];
     const threshold = 0.1;
 
     if (Math.abs(position.x - 1) < threshold) faces.push("R");
@@ -1029,15 +1009,15 @@ function FaceDetector({ controlsRef }: { controlsRef: React.RefObject<any> }) {
     return faces;
   };
 
-  const getFaceFromNormal = (normal: Vector3): Face => {
+  const getFaceFromNormal = (normal) => {
     normal.normalize();
-    const axes: ("x" | "y" | "z")[] = ["x", "y", "z"];
+    const axes = ["x", "y", "z"];
     const major = axes.reduce((a, b) =>
       Math.abs(normal[a]) > Math.abs(normal[b]) ? a : b
     );
     const sign = Math.sign(normal[major]);
 
-    const faceMap: Record<string, Face> = {
+    const faceMap = {
       "x+": "R",
       "x-": "L",
       "y+": "U",
@@ -1049,7 +1029,7 @@ function FaceDetector({ controlsRef }: { controlsRef: React.RefObject<any> }) {
     return faceMap[`${major}${sign > 0 ? "+" : "-"}`];
   };
 
-  const handlePointerDown = (event: PointerEvent) => {
+  const handlePointerDown = (event) => {
     if (useCubeStore.getState().isAnimating) return;
 
     const bounds = gl.domElement.getBoundingClientRect();
@@ -1060,7 +1040,7 @@ function FaceDetector({ controlsRef }: { controlsRef: React.RefObject<any> }) {
     const intersects = raycaster.intersectObjects(scene.children, true);
 
     const hit = intersects.find((i) =>
-      (i.object as Mesh).geometry?.type.includes("Box")
+      i.object.geometry?.type.includes("Box")
     );
 
     if (!hit || !hit.object) {
@@ -1093,7 +1073,7 @@ function FaceDetector({ controlsRef }: { controlsRef: React.RefObject<any> }) {
       position: cubiePos,
       faces: getCubieFaces(cubiePos),
       clickedFace: getFaceFromNormal(
-        hit.face!.normal.clone().transformDirection(hit.object.matrixWorld)
+        hit.face.normal.clone().transformDirection(hit.object.matrixWorld)
       ),
       frontFace: frontFace,
       matrixPosition: getCubieMatrixPosition(cubiePos, frontFace),
@@ -1107,7 +1087,7 @@ function FaceDetector({ controlsRef }: { controlsRef: React.RefObject<any> }) {
     isDragging.current = false;
   };
 
-  const handlePointerMove = (event: PointerEvent) => {
+  const handlePointerMove = (event) => {
     if (!dragInfo.current || useCubeStore.getState().isAnimating) return;
 
     const dx = event.clientX - dragInfo.current.startPos.x;
@@ -1129,7 +1109,7 @@ function FaceDetector({ controlsRef }: { controlsRef: React.RefObject<any> }) {
   };
 
   // SIMPLIFIED: Updated handlePointerUp using gesture matrix direction
-  const handlePointerUp = (event: PointerEvent) => {
+  const handlePointerUp = (event) => {
     if (
       dragInfo.current &&
       isDragging.current &&
@@ -1137,7 +1117,7 @@ function FaceDetector({ controlsRef }: { controlsRef: React.RefObject<any> }) {
     ) {
       const dx = event.clientX - dragInfo.current.startPos.x;
       const dy = event.clientY - dragInfo.current.startPos.y;
-      let dragDirection: "up" | "down" | "left" | "right";
+      let dragDirection;
 
       if (Math.abs(dx) > Math.abs(dy)) {
         dragDirection = dx > 0 ? "right" : "left";
@@ -1224,7 +1204,7 @@ function FaceDetector({ controlsRef }: { controlsRef: React.RefObject<any> }) {
 }
 
 function Scene() {
-  const controlsRef = useRef<any>(null);
+  const controlsRef = useRef(null);
 
   return (
     <>

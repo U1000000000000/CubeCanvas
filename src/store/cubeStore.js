@@ -1,5 +1,4 @@
 import { create } from 'zustand';
-import { CubeState, CubieState, Face, Move, CubeColor } from '../types/cube';
 import {
   rotateMaterialsClockwise,
   getFaceRotationAxis,
@@ -16,9 +15,9 @@ const FACE_COLORS = {
   BOTTOM: 'yellow', // -Y
   FRONT: 'green',   // +Z
   BACK: 'blue'      // -Z
-} as const;
+};
 
-function getCubieType(x: number, y: number, z: number): 'corner' | 'edge' | 'center' | 'core' {
+function getCubieType(x, y, z) {
   const absX = Math.abs(x);
   const absY = Math.abs(y);
   const absZ = Math.abs(z);
@@ -31,21 +30,21 @@ function getCubieType(x: number, y: number, z: number): 'corner' | 'edge' | 'cen
   return 'edge';
 }
 
-function getCubieMaterials(x: number, y: number, z: number): CubeColor[] {
-  const materials: CubeColor[] = ['black', 'black', 'black', 'black', 'black', 'black'];
+function getCubieMaterials(x, y, z) {
+  const materials = ['black', 'black', 'black', 'black', 'black', 'black'];
 
-  if (x === 1) materials[0] = FACE_COLORS.RIGHT as CubeColor;
-  if (x === -1) materials[1] = FACE_COLORS.LEFT as CubeColor;
-  if (y === 1) materials[2] = FACE_COLORS.TOP as CubeColor;
-  if (y === -1) materials[3] = FACE_COLORS.BOTTOM as CubeColor;
-  if (z === 1) materials[4] = FACE_COLORS.FRONT as CubeColor;
-  if (z === -1) materials[5] = FACE_COLORS.BACK as CubeColor;
+  if (x === 1) materials[0] = FACE_COLORS.RIGHT;
+  if (x === -1) materials[1] = FACE_COLORS.LEFT;
+  if (y === 1) materials[2] = FACE_COLORS.TOP;
+  if (y === -1) materials[3] = FACE_COLORS.BOTTOM;
+  if (z === 1) materials[4] = FACE_COLORS.FRONT;
+  if (z === -1) materials[5] = FACE_COLORS.BACK;
 
   return materials;
 }
 
-function createSolvedCube(): CubieState[] {
-  const cubies: CubieState[] = [];
+function createSolvedCube() {
+  const cubies = [];
   for (let x = -1; x <= 1; x++) {
     for (let y = -1; y <= 1; y++) {
       for (let z = -1; z <= 1; z++) {
@@ -62,9 +61,9 @@ function createSolvedCube(): CubieState[] {
 }
 
 // Helper to wait for current animation to finish
-let get: () => CubeStore; // forward declare
+let get; // forward declare
 
-async function waitForAnimationToComplete(): Promise<void> {
+async function waitForAnimationToComplete() {
   return new Promise((resolve) => {
     const check = () => {
       if (!get().isAnimating) resolve();
@@ -74,28 +73,7 @@ async function waitForAnimationToComplete(): Promise<void> {
   });
 }
 
-interface CubeStore extends CubeState {
-  // New properties for improved animation system
-  rotationDirection: boolean | null;
-  animatingCubies: string[];
-  
-  // Existing methods
-  rotateFace: (face: Face, clockwise?: boolean) => void;
-  setAnimatingFace: (face: Face | null) => void;
-  updateCubiePositionsAndMaterials: (face: Face, clockwise: boolean) => void;
-  scramble: () => void;
-  reset: () => void;
-  setAnimating: (animating: boolean) => void;
-  startTimer: () => void;
-  updateTimer: () => void;
-  stopTimer: () => void;
-  
-  // New methods for improved system
-  setRotationDirection: (clockwise: boolean) => void;
-  setAnimatingCubies: (cubieIds: string[]) => void;
-}
-
-export const useCubeStore = create<CubeStore>((_set, _get) => {
+export const useCubeStore = create((_set, _get) => {
   get = _get; // capture zustand's get() for waitForAnimation helper
   const set = _set;
 
@@ -108,18 +86,19 @@ export const useCubeStore = create<CubeStore>((_set, _get) => {
     currentTime: 0,
     rotationDirection: null,
     animatingCubies: [],
+    hasScrambled: false,
 
-    setAnimatingFace: (face: Face | null) => set({ animatingFace: face }),
+    setAnimatingFace: (face) => set({ animatingFace: face }),
 
-    setRotationDirection: (clockwise: boolean) => {
+    setRotationDirection: (clockwise) => {
       set({ rotationDirection: clockwise });
     },
 
-    setAnimatingCubies: (cubieIds: string[]) => {
+    setAnimatingCubies: (cubieIds) => {
       set({ animatingCubies: cubieIds });
     },
 
-    rotateFace: (face: Face, clockwise = true) => {
+    rotateFace: (face, clockwise = true) => {
       const state = get();
       if (state.isAnimating) return;
 
@@ -137,7 +116,7 @@ export const useCubeStore = create<CubeStore>((_set, _get) => {
       // The timeout approach is replaced by the frame-based animation system
     },
 
-    updateCubiePositionsAndMaterials: (face: Face, clockwise: boolean) => {
+    updateCubiePositionsAndMaterials: (face, clockwise) => {
       const state = get();
       const axis = getFaceRotationAxis(face);
       const rotatingCubies = getCubiesOnFace(state.cubies, face);
@@ -207,8 +186,8 @@ export const useCubeStore = create<CubeStore>((_set, _get) => {
       const state = get();
       if (state.isAnimating) return;
 
-      const faces: Face[] = ['U', 'D', 'L', 'R', 'F', 'B'];
-      const moves: Move[] = [];
+      const faces = ['U', 'D', 'L', 'R', 'F', 'B'];
+      const moves = [];
 
       for (let i = 0; i < 25; i++) {
         const face = faces[Math.floor(Math.random() * faces.length)];
@@ -216,7 +195,7 @@ export const useCubeStore = create<CubeStore>((_set, _get) => {
         moves.push({ face, clockwise });
       }
 
-      set({ startTime: Date.now() });
+      set({ startTime: Date.now(), hasScrambled: true });
 
       for (const move of moves) {
         await waitForAnimationToComplete();
@@ -240,11 +219,12 @@ export const useCubeStore = create<CubeStore>((_set, _get) => {
         isAnimating: false,
         animatingFace: null,
         rotationDirection: null,
-        animatingCubies: []
+        animatingCubies: [],
+        hasScrambled: false
       });
     },
 
-    setAnimating: (animating: boolean) => set({ isAnimating: animating }),
+    setAnimating: (animating) => set({ isAnimating: animating }),
     startTimer: () => set({ startTime: Date.now() }),
 
     updateTimer: () => {

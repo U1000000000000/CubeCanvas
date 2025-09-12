@@ -1,13 +1,8 @@
-// Fixed manualCubeStore.ts - Consistent rotation direction logic
+// Fixed manualCubeStore.js - Consistent rotation direction logic
 import { create } from 'zustand';
-import { CubeColor, Face, CubieState, Position } from '../types/cube';
 
 // COPY the working rotation functions from your successful cubeStore:
-function rotateMaterialsClockwise(
-  axis: 'x' | 'y' | 'z',
-  materials: CubeColor[],
-  clockwise: boolean = true
-): CubeColor[] {
+function rotateMaterialsClockwise(axis, materials, clockwise = true) {
   if (!materials || materials.length !== 6) {
     console.error('Invalid materials array for rotation:', materials);
     return materials || ['gray', 'gray', 'gray', 'gray', 'gray', 'gray'];
@@ -20,7 +15,7 @@ function rotateMaterialsClockwise(
     return materials;
   }
   
-  const newMaterials: CubeColor[] = [...materials];
+  const newMaterials = [...materials];
   
   if (axis === 'x') {
     if (clockwise) {
@@ -69,11 +64,7 @@ function rotateMaterialsClockwise(
   return newMaterials;
 }
 
-function rotatePosition(
-  position: Position,
-  axis: 'x' | 'y' | 'z',
-  clockwise: boolean
-): Position {
+function rotatePosition(position, axis, clockwise) {
   if (!position || typeof position.x !== 'number' || 
       typeof position.y !== 'number' || typeof position.z !== 'number') {
     console.error('Invalid position for rotation:', position);
@@ -99,7 +90,7 @@ function rotatePosition(
   return position;
 }
 
-function getFaceRotationAxis(face: Face): 'x' | 'y' | 'z' {
+function getFaceRotationAxis(face) {
   switch (face) {
     case 'U':
     case 'D':
@@ -116,7 +107,7 @@ function getFaceRotationAxis(face: Face): 'x' | 'y' | 'z' {
 }
 
 // 🔥 CRITICAL FIX: Simplified rotation direction logic - only L face needs inversion
-function getFaceRotationDirection(face: Face, clockwise: boolean): boolean {
+function getFaceRotationDirection(face, clockwise) {
   switch (face) {
     case 'L': // Left face rotates opposite (this needs inversion)
       return !clockwise;
@@ -130,8 +121,8 @@ function getFaceRotationDirection(face: Face, clockwise: boolean): boolean {
   }
 }
 
-function getCubiesOnFace(cubies: CubieState[], face: Face): CubieState[] {
-  const faceConditions: Record<Face, (cubie: CubieState) => boolean> = {
+function getCubiesOnFace(cubies, face) {
+  const faceConditions = {
     U: (cubie) => cubie.position.y === 1,
     D: (cubie) => cubie.position.y === -1,
     L: (cubie) => cubie.position.x === -1,
@@ -144,11 +135,11 @@ function getCubiesOnFace(cubies: CubieState[], face: Face): CubieState[] {
 }
 
 // Create initial cube with gray materials and center colors
-function createInitialCube(): CubieState[] {
-  const cubies: CubieState[] = [];
+function createInitialCube() {
+  const cubies = [];
   
   // Standard center colors for a solved cube
-  const centerColors: Record<string, CubeColor> = {
+  const centerColors = {
     "0,1,0": "white",   // Top center (U)
     "0,-1,0": "yellow", // Bottom center (D) 
     "1,0,0": "red",     // Right center (R)
@@ -162,7 +153,7 @@ function createInitialCube(): CubieState[] {
       for (let z = -1; z <= 1; z++) {
         const position = { x, y, z };
         const id = `${x},${y},${z}`;
-        const materials: CubeColor[] = ['gray', 'gray', 'gray', 'gray', 'gray', 'gray'];
+        const materials = ['gray', 'gray', 'gray', 'gray', 'gray', 'gray'];
         
         // Set center colors
         const centerColor = centerColors[id];
@@ -191,7 +182,7 @@ function createInitialCube(): CubieState[] {
           id,
           position,
           materials,
-          type: type as 'corner' | 'edge' | 'center' | 'core'
+          type
         });
       }
     }
@@ -200,27 +191,14 @@ function createInitialCube(): CubieState[] {
   return cubies;
 }
 
-interface ManualCubeStore {
-  cubies: CubieState[];
-  isAnimating: boolean;
-  animatingFace: Face | null;
-  animatingCubies: string[];
-  rotationDirection: boolean | null;
-  
-  rotateFace: (face: Face, clockwise?: boolean) => void;
-  updateCubiePositionsAndMaterials: (face: Face, clockwise: boolean) => void;
-  setAnimatingCubies: (cubieIds: string[]) => void;
-  reset: () => void;
-}
-
-export const useManualCubeStore = create<ManualCubeStore>((set, get) => ({
+export const useManualCubeStore = create((set, get) => ({
   cubies: createInitialCube(),
   isAnimating: false,
   animatingFace: null,
   animatingCubies: [],
   rotationDirection: null,
 
-  rotateFace: (face: Face, clockwise = true) => {
+  rotateFace: (face, clockwise = true) => {
     const state = get();
     if (state.isAnimating) return;
 
@@ -233,7 +211,7 @@ export const useManualCubeStore = create<ManualCubeStore>((set, get) => ({
     });
   },
 
-  updateCubiePositionsAndMaterials: (face: Face, clockwise: boolean) => {
+  updateCubiePositionsAndMaterials: (face, clockwise) => {
     const state = get();
     
     // 🔥 CRITICAL FIX: Use consistent rotation direction calculation
@@ -320,7 +298,7 @@ export const useManualCubeStore = create<ManualCubeStore>((set, get) => ({
     });
   },
 
-  setAnimatingCubies: (cubieIds: string[]) => {
+  setAnimatingCubies: (cubieIds) => {
     set({ animatingCubies: cubieIds });
   },
 

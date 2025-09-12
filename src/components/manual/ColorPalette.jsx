@@ -1,12 +1,6 @@
 import React from 'react';
-import { CubeColor } from '../../types/cube';
 
-interface ColorPaletteProps {
-  onColorSelect: (color: CubeColor) => void;
-  selectedColor: CubeColor | null;
-}
-
-const COLORS: { color: CubeColor; name: string; hex: string }[] = [
+const COLORS = [
   { color: 'white', name: 'White', hex: '#ffffff' },
   { color: 'yellow', name: 'Yellow', hex: '#ffed4a' },
   { color: 'red', name: 'Red', hex: '#e53e3e' },
@@ -15,7 +9,7 @@ const COLORS: { color: CubeColor; name: string; hex: string }[] = [
   { color: 'blue', name: 'Blue', hex: '#3182ce' },
 ];
 
-export function ColorPalette({ onColorSelect, selectedColor }: ColorPaletteProps) {
+export function ColorPalette({ onColorSelect, selectedColor }) {
   return (
     <div className="bg-black/20 backdrop-blur-md rounded-2xl p-6 border border-white/10">
       <h3 className="text-lg font-semibold text-white mb-4">Color Palette</h3>

@@ -1,11 +1,10 @@
-import React, { useEffect } from 'react'; // Add useEffect here
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import LandingPage  from './pages/LandingPage';
+import LandingPage from './pages/LandingPage';
 import { CubePage } from './pages/CubePage';
 import { TimelineManualSolvePage } from './pages/TimelineManualSolvePage';
 
 function App() {
-
   return (
     <Router>
       <Routes>

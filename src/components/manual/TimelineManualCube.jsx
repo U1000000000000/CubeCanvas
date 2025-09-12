@@ -1,4 +1,4 @@
-// src/components/manual/TimelineManualCube.tsx - FIXED with proper cubie identification and rotation prevention
+// src/components/manual/TimelineManualCube.jsx - FIXED with proper cubie identification and rotation prevention
 import React, { useRef, useEffect, useState } from 'react';
 import { Canvas, useThree, useFrame } from '@react-three/fiber';
 import { OrbitControls } from '@react-three/drei';
@@ -6,50 +6,16 @@ import { Group, Euler, Vector3 } from 'three';
 import { useManualCubeStore } from '../../store/manualCubeStore';
 import { TimelineManualCubie } from './TimelineManualCubie';
 import { getFaceRotationAxis, getFaceRotationDirection } from '../../utils/rotationUtils';
-import { Face } from '../../types/cube';
-
-interface TimelineFrame {
-  timestamp: number;
-  moveIndex: number;
-  moveProgress: number;
-  frameType: 'camera_transition' | 'rotation' | 'idle';
-  rotationState: {
-    face: Face | null;
-    axis: "x" | "y" | "z" | null;
-    angle: number;
-    progress: number;
-    cubieIds: string[];
-  };
-  cameraFrame?: {
-    position: Vector3;
-    lookAt: Vector3;
-    progress: number;
-  };
-}
-
-interface TimelineManualCubeProps {
-  onStickerClick: (cubieId: string, faceIndex: number) => void;
-  timelineMode?: boolean;
-  currentRotationAngle?: number;
-  rotatingAxis?: 'x' | 'y' | 'z' | null;
-  rotatingCubieIds?: string[];
-  currentFrame?: TimelineFrame | null;
-  videoControlEnabled?: boolean;
-}
 
 function CameraController({
   currentFrame,
   videoControlEnabled = false,
   orbitControlsRef,
-}: {
-  currentFrame?: TimelineFrame | null;
-  videoControlEnabled?: boolean;
-  orbitControlsRef: React.RefObject<any>;
 }) {
   const { camera } = useThree();
-  const lastFrameTimestampRef = useRef<number>(-1);
-  const targetPositionRef = useRef<Vector3>(new Vector3());
-  const targetLookAtRef = useRef<Vector3>(new Vector3(0, 0, 0));
+  const lastFrameTimestampRef = useRef(-1);
+  const targetPositionRef = useRef(new Vector3());
+  const targetLookAtRef = useRef(new Vector3(0, 0, 0));
 
   useFrame(() => {
     if (!videoControlEnabled || !currentFrame?.cameraFrame) {
@@ -101,11 +67,9 @@ function CubeGroup({
   currentFrame,
   videoControlEnabled = false,
   orbitControlsRef,
-}: TimelineManualCubeProps & {
-  orbitControlsRef: React.RefObject<any>;
 }) {
-  const animationGroupRef = useRef<Group>(null);
-  const cubeGroupRef = useRef<Group>(null);
+  const animationGroupRef = useRef(null);
+  const cubeGroupRef = useRef(null);
 
   const { camera } = useThree();
   const {
@@ -223,12 +187,12 @@ function CubeGroup({
       if (axis === 'x') rot.x = angle;
       else if (axis === 'y') rot.y = angle;
       else if (axis === 'z') rot.z = angle;
-      animationGroupRef.current!.rotation.copy(rot);
+      animationGroupRef.current.rotation.copy(rot);
 
       if (t < 1) {
         requestAnimationFrame(tick);
       } else {
-        animationGroupRef.current!.rotation.set(0, 0, 0);
+        animationGroupRef.current.rotation.set(0, 0, 0);
         setAnimatingCubies([]);
 
         // Delay state update to prevent flicker
@@ -336,8 +300,6 @@ function Scene({
   currentFrame,
   videoControlEnabled,
   orbitControlsRef,
-}: TimelineManualCubeProps & {
-  orbitControlsRef: React.RefObject<any>;
 }) {
   return (
     <>
@@ -383,8 +345,8 @@ export function TimelineManualCube({
   rotatingCubieIds = [],
   currentFrame = null,
   videoControlEnabled = false,
-}: TimelineManualCubeProps) {
-  const orbitControlsRef = useRef<any>(null);
+}) {
+  const orbitControlsRef = useRef(null);
 
   return (
     <div className="w-full h-full">

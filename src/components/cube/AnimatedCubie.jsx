@@ -1,16 +1,9 @@
 import React, { useRef, useEffect, useMemo } from "react";
 import { Mesh, Group } from "three";
-import { CubieState, CubeColor } from "../../types/cube";
 import { useCubeStore } from "../../store/cubeStore";
 import * as THREE from "three";
 
-interface AnimatedCubieProps {
-  cubie: CubieState;
-  animationGroup: React.RefObject<Group>;
-  mainGroup: React.RefObject<Group>;
-}
-
-const COLOR_MAP: Record<CubeColor | "black" | "gray", string> = {
+const COLOR_MAP = {
   white: "#FFFFFF",
   yellow: "#FFD700",
   red: "#C41E3A",
@@ -39,7 +32,7 @@ const BASE_FACE_ROT = [
   [0, Math.PI, 0], // -Z
 ];
 
-function isFaceVisible(faceIndex: number, x: number, y: number, z: number) {
+function isFaceVisible(faceIndex, x, y, z) {
   if (faceIndex === 0 && x === 1) return true;
   if (faceIndex === 1 && x === -1) return true;
   if (faceIndex === 2 && y === 1) return true;
@@ -53,11 +46,11 @@ export function AnimatedCubie({
   cubie,
   animationGroup,
   mainGroup,
-}: AnimatedCubieProps) {
-  const bodyRef = useRef<Mesh>(null);
-  const groupRef = useRef<Group>(null);
+}) {
+  const bodyRef = useRef(null);
+  const groupRef = useRef(null);
   const wasAnimatingRef = useRef(false);
-  const lastPositionRef = useRef<string>("");
+  const lastPositionRef = useRef("");
   const { animatingCubies } = useCubeStore();
 
   const validatedCubie = useMemo(() => {
@@ -132,12 +125,12 @@ export function AnimatedCubie({
       const basePos = BASE_FACE_POS[i];
       const baseRot = BASE_FACE_ROT[i];
 
-      const pos: [number, number, number] = [
+      const pos = [
         basePos[0] === 0 ? 0 : basePos[0] > 0 ? STICKER_OFFSET : -STICKER_OFFSET,
         basePos[1] === 0 ? 0 : basePos[1] > 0 ? STICKER_OFFSET : -STICKER_OFFSET,
         basePos[2] === 0 ? 0 : basePos[2] > 0 ? STICKER_OFFSET : -STICKER_OFFSET,
       ];
-      const rot = baseRot as [number, number, number];
+      const rot = baseRot;
 
       meshes.push(
         <mesh key={`${validatedCubie.id}-sticker-${i}`} position={pos} rotation={rot}>

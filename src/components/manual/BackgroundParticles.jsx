@@ -1,4 +1,4 @@
-// BackgroundParticles.tsx
+// BackgroundParticles.jsx
 import React, { useEffect, useState, useRef } from "react";
 // 1. Import only the required components and a custom list of icons.
 import { CustomIcon, VIBRANT_COLORS } from 'icon-sphere';
@@ -20,48 +20,15 @@ const SELECTED_PARTICLE_ICONS = [
   "football",
 ];
 
-interface Particle {
-  id: number;
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  size: number;
-  color: string;
-  icon: string;
-  rotationSpeed: number;
-  rotation: number;
-  orbitRadius: number;
-  orbitSpeed: number;
-  orbitAngle: number;
-  centerX: number;
-  centerY: number;
-}
-
-interface BackgroundParticlesProps {
-  isActive: boolean;
-  particleCount?: number;
-  scrollDirection?: "forward" | "reverse" | "paused";
-  minDistance?: number;
-  alwaysAnimate?: boolean;
-  animateMovement?: boolean; // New prop to control movement
-}
-
 // Helper function to calculate distance between two particles
-const getDistance = (p1: Particle, p2: Particle): number => {
+const getDistance = (p1, p2) => {
   const dx = p1.x - p2.x;
   const dy = p1.y - p2.y;
   return Math.sqrt(dx * dx + dy * dy);
 };
 
 // Helper function to check if a position is valid (not too close to existing particles)
-const isValidPosition = (
-  x: number,
-  y: number,
-  size: number,
-  existingParticles: Particle[],
-  minDistance: number
-): boolean => {
+const isValidPosition = (x, y, size, existingParticles, minDistance) => {
   for (const particle of existingParticles) {
     const dx = x - particle.x;
     const dy = y - particle.y;
@@ -76,12 +43,7 @@ const isValidPosition = (
 };
 
 // Helper function to find a valid position with retries
-const findValidPosition = (
-  existingParticles: Particle[],
-  size: number,
-  minDistance: number,
-  maxRetries = 100
-): { x: number; y: number; centerX: number; centerY: number } => {
+const findValidPosition = (existingParticles, size, minDistance, maxRetries = 100) => {
   const screenWidth = window.innerWidth;
   const screenHeight = window.innerHeight;
   const screenCenterX = screenWidth / 2;
@@ -183,10 +145,7 @@ const findValidPosition = (
 };
 
 // Helper function to apply repulsion forces between particles
-const applyRepulsionForces = (
-  particles: Particle[],
-  minDistance: number
-): Particle[] => {
+const applyRepulsionForces = (particles, minDistance) => {
   return particles.map((particle, index) => {
     let repulsionX = 0;
     let repulsionY = 0;
@@ -216,18 +175,18 @@ const applyRepulsionForces = (
   });
 };
 
-export const BackgroundParticles: React.FC<BackgroundParticlesProps> = ({
+export const BackgroundParticles = ({
   isActive,
   particleCount = 15,
   scrollDirection = "paused",
   minDistance = 80,
   alwaysAnimate = false,
-  animateMovement = true, // Default to true for backward compatibility
+  animateMovement = true, // New prop to control movement
 }) => {
-  const [particles, setParticles] = useState<Particle[]>([]);
+  const [particles, setParticles] = useState([]);
   const [animationPhase, setAnimationPhase] = useState(0);
-  const animationFrameRef = useRef<number>();
-  const containerRef = useRef<HTMLDivElement>(null);
+  const animationFrameRef = useRef();
+  const containerRef = useRef(null);
   const [isAnimationEnabled, setIsAnimationEnabled] = useState(true);
 
   const toggleAnimation = () => {
@@ -256,7 +215,7 @@ export const BackgroundParticles: React.FC<BackgroundParticlesProps> = ({
 
   useEffect(() => {
     const initParticles = () => {
-      const newParticles: Particle[] = [];
+      const newParticles = [];
       const screenWidth = window.innerWidth;
       const screenHeight = window.innerHeight;
 

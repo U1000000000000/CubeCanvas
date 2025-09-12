@@ -6,7 +6,7 @@ export function Stats() {
   const { moveCount, startTime, currentTime, updateTimer } = useCubeStore();
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval;
     
     if (startTime) {
       interval = setInterval(() => {
@@ -19,7 +19,7 @@ export function Stats() {
     };
   }, [startTime, updateTimer]);
 
-  const formatTime = (ms: number) => {
+  const formatTime = (ms) => {
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;

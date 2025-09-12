@@ -1,19 +1,10 @@
-// src/components/manual/TimelineManualCubie.tsx - Solid cube with only visible stickers
+// src/components/manual/TimelineManualCubie.jsx - Solid cube with only visible stickers
 import React, { useRef, useEffect, useMemo } from 'react';
 import { Mesh, Group } from 'three';
-import { CubieState, CubeColor } from '../../types/cube';
 import { useManualCubeStore } from '../../store/manualCubeStore';
 import * as THREE from 'three';
 
-interface TimelineManualCubieProps {
-  cubie: CubieState;
-  animationGroup: React.RefObject<Group>;
-  mainGroup: React.RefObject<Group>;
-  onStickerClick: (cubieId: string, faceIndex: number) => void;
-  isTimelineRotating?: boolean;
-}
-
-const COLOR_MAP: Record<CubeColor | 'black' | 'gray', string> = {
+const COLOR_MAP = {
   white: '#FFFFFF',
   yellow: '#FFD700',
   red: '#C41E3A',
@@ -43,7 +34,7 @@ const BASE_FACE_ROT = [
 ];
 
 // helper to check if a face is visible on outer surface
-function isFaceVisible(faceIndex: number, x: number, y: number, z: number): boolean {
+function isFaceVisible(faceIndex, x, y, z) {
   if (faceIndex === 0 && x === 1) return true;   // +X face
   if (faceIndex === 1 && x === -1) return true;  // -X face
   if (faceIndex === 2 && y === 1) return true;   // +Y face
@@ -59,11 +50,11 @@ export function TimelineManualCubie({
   mainGroup,
   onStickerClick,
   isTimelineRotating = false,
-}: TimelineManualCubieProps) {
-  const bodyRef = useRef<Mesh>(null);
-  const groupRef = useRef<Group>(null);
+}) {
+  const bodyRef = useRef(null);
+  const groupRef = useRef(null);
   const wasAnimatingRef = useRef(false);
-  const lastPositionRef = useRef<string>('');
+  const lastPositionRef = useRef('');
   const { animatingCubies } = useManualCubeStore();
 
   const validatedCubie = useMemo(() => {
@@ -138,12 +129,12 @@ export function TimelineManualCubie({
       const basePos = BASE_FACE_POS[i];
       const baseRot = BASE_FACE_ROT[i];
 
-      const pos: [number, number, number] = [
+      const pos = [
         basePos[0] === 0 ? 0 : (basePos[0] > 0 ? STICKER_OFFSET : -STICKER_OFFSET),
         basePos[1] === 0 ? 0 : (basePos[1] > 0 ? STICKER_OFFSET : -STICKER_OFFSET),
         basePos[2] === 0 ? 0 : (basePos[2] > 0 ? STICKER_OFFSET : -STICKER_OFFSET),
       ];
-      const rot = baseRot as [number, number, number];
+      const rot = baseRot;
 
       meshes.push(
         <mesh
@@ -173,7 +164,7 @@ export function TimelineManualCubie({
   return (
     <group ref={groupRef} key={validatedCubie.id}>
       {/* Main cubie body */}
-      <mesh ref={bodyRef} castShadow receiveShadow raycast={() => null as any}>
+      <mesh ref={bodyRef} castShadow receiveShadow raycast={() => null}>
         <boxGeometry args={[1, 1, 1]} />
         <meshLambertMaterial color={COLOR_MAP.black} />
       </mesh>
@@ -183,7 +174,7 @@ export function TimelineManualCubie({
 
       {/* Debug indicator when animating */}
       {shouldAnimate && (
-        <mesh position={[0, 0, 0]} raycast={() => null as any}>
+        <mesh position={[0, 0, 0]} raycast={() => null}>
           <sphereGeometry args={[0.1]} />
           <meshBasicMaterial color="yellow" transparent opacity={0.5} />
         </mesh>

@@ -1,7 +1,7 @@
 // BackgroundParticles.tsx
 import React, { useEffect, useState, useRef } from "react";
 // 1. Import only the required components and a custom list of icons.
-import { CustomIcon, VIBRANT_COLORS } from "./IconSphere";
+import { CustomIcon, VIBRANT_COLORS } from 'icon-sphere';
 
 // 2. Define a local icon list with only the desired particles.
 const SELECTED_PARTICLE_ICONS = [

@@ -436,80 +436,131 @@ export function TimelineManualSolvePage() {
     useManualCubeStore.setState({ cubies: updatedCubies });
   };
 
+  // const solveCube = async () => {
+  //   if (!isComplete) return;
+  //   setIsSolving(true);
+
+  //   try {
+  //     const { cubies } = useManualCubeStore.getState();
+  //     const cubeString = generateCubeString(cubies);
+
+  //     const worker = new Worker("solver.js");
+
+  //     worker.onmessage = (e) => {
+  //       const { type, result, error } = e.data;
+
+  //       if (type === "CoordCube") {
+  //         worker.postMessage({
+  //           type: "solve",
+  //           cube: cubeString,
+  //           maxDepth: 24,
+  //           maxTime: 15,
+  //         });
+  //       }
+
+  //       if (type === "solution") {
+  //         if (
+  //           result &&
+  //           typeof result === "string" &&
+  //           result.startsWith("Error")
+  //         ) {
+  //           const errorMatch = result.match(/Error (\d+)/);
+  //           const errorCode = errorMatch ? parseInt(errorMatch[1]) : null;
+
+  //           let errorMessage = "Solver encountered an issue";
+
+  //           if (errorCode >= 1 && errorCode <= 6) {
+  //             errorMessage = "Invalid cube";
+  //           } else if (errorCode === 7) {
+  //             errorMessage = "Solution complexity exceeded";
+  //           } else if (errorCode === 8) {
+  //             errorMessage = "Solver timeout";
+  //           }
+
+  //           setTempWarning(errorMessage);
+  //           setTimeout(() => setTempWarning(null), 2000);
+  //           setIsSolving(false);
+  //           worker.terminate();
+  //           return;
+  //         }
+
+  //         setSolution(result);
+  //         setIsSolving(false);
+  //         worker.terminate();
+  //       }
+
+  //       if (type === "error") {
+  //         setTempWarning(`Solver error: ${error || "Unknown error"}`);
+  //         setTimeout(() => setTempWarning(null), 2000);
+  //         setIsSolving(false);
+  //         worker.terminate();
+  //       }
+  //     };
+
+  //     worker.onerror = (err) => {
+  //       setTempWarning("Solver worker failed to load");
+  //       setTimeout(() => setTempWarning(null), 2000);
+  //       setIsSolving(false);
+  //     };
+
+  //     worker.postMessage({ type: "generateTables" });
+  //   } catch (err) {
+  //     setTempWarning("Failed to initialize solver");
+  //     setTimeout(() => setTempWarning(null), 2000);
+  //     setIsSolving(false);
+  //   }
+  // };
+
+
   const solveCube = async () => {
     if (!isComplete) return;
     setIsSolving(true);
 
     try {
+      // 1. Get the cube string as before
       const { cubies } = useManualCubeStore.getState();
       const cubeString = generateCubeString(cubies);
 
-      const worker = new Worker("solver.js");
+      // 2. Define your API URL
+      // IMPORTANT: Replace with your actual Render URL
+      const apiUrl = `https://cuber-sq32.onrender.com/solve?cube=${cubeString}`;
+      // 3. Make the network request to your API
+      const response = await fetch(apiUrl);
 
-      worker.onmessage = (e) => {
-        const { type, result, error } = e.data;
+      // Handle cases where the server is down or there's a network error
+      if (!response.ok) {
+        throw new Error(`Server responded with status: ${response.status}`);
+      }
 
-        if (type === "CoordCube") {
-          worker.postMessage({
-            type: "solve",
-            cube: cubeString,
-            maxDepth: 24,
-            maxTime: 15,
-          });
-        }
+      const data = await response.json();
 
-        if (type === "solution") {
-          if (
-            result &&
-            typeof result === "string" &&
-            result.startsWith("Error")
-          ) {
-            const errorMatch = result.match(/Error (\d+)/);
-            const errorCode = errorMatch ? parseInt(errorMatch[1]) : null;
-
-            let errorMessage = "Solver encountered an issue";
-
-            if (errorCode >= 1 && errorCode <= 6) {
-              errorMessage = "Invalid cube";
-            } else if (errorCode === 7) {
-              errorMessage = "Solution complexity exceeded";
-            } else if (errorCode === 8) {
-              errorMessage = "Solver timeout";
-            }
-
-            setTempWarning(errorMessage);
-            setTimeout(() => setTempWarning(null), 2000);
-            setIsSolving(false);
-            worker.terminate();
-            return;
-          }
-
-          setSolution(result);
-          setIsSolving(false);
-          worker.terminate();
-        }
-
-        if (type === "error") {
-          setTempWarning(`Solver error: ${error || "Unknown error"}`);
+      // 4. Process the response from the API
+      if (data.solution) {
+        // Handle a successful solution
+        if (data.solution.includes("Error")) {
+          // The solver itself found an issue with the cube (e.g., invalid scramble)
+          setTempWarning("Invalid cube state provided");
           setTimeout(() => setTempWarning(null), 2000);
-          setIsSolving(false);
-          worker.terminate();
+        } else {
+          // Success!
+          setSolution(data.solution);
         }
-      };
+      } else {
+        // Handle errors returned by the API's JSON response
+        throw new Error(data.error || "An unknown API error occurred");
+      }
 
-      worker.onerror = (err) => {
-        setTempWarning("Solver worker failed to load");
-        setTimeout(() => setTempWarning(null), 2000);
-        setIsSolving(false);
-      };
-
-      worker.postMessage({ type: "generateTables" });
     } catch (err) {
-      setTempWarning("Failed to initialize solver");
+      // Catch any errors from the fetch call or from processing the response
+      setTempWarning("Failed to connect to solver");
       setTimeout(() => setTempWarning(null), 2000);
+      console.error("Solver API error:", err); // Log the actual error for debugging
+    } finally {
+      // 5. Ensure the solving state is always reset
       setIsSolving(false);
     }
   };
+
 
   function generateCubeString(cubies: any[]): string {
     const colorToFaceMap: Record<CubeColor, string> = {

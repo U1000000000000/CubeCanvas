@@ -3,6 +3,7 @@ import { useManualCubeStore } from "../store/manualCubeStore";
 import { parseMoves } from "../utils/simpleSolver";
 import { Move, CubieState, Face, CubeColor } from "../types/cube";
 import { Vector3, Spherical } from "three";
+import { log } from "console";
 
 // --- ENHANCED ANIMATION SETTINGS FOR SMOOTH 60FPS ---
 const ENHANCED_ANIMATION_CONFIG = {
@@ -857,20 +858,26 @@ export function useTimelineAnimation({
     [isActive]
   );
 
-  const SCRUB_SPEED = 0.05; // Controls how fast the timeline moves when scrolling. Adjust if needed.
+  // Define separate speeds for different input types
+  const WHEEL_SCRUB_SPEED = 0.01;
+  const TOUCH_SCRUB_SPEED = 0.05; 
 
   const scrubTimeline = useCallback(
-    (direction: "forward" | "reverse") => {
+    (direction: "forward" | "reverse", inputType: "wheel" | "touch") => {
       if (!isActive) return;
 
-      const delta = direction === "forward" ? SCRUB_SPEED : -SCRUB_SPEED;
+      const speed =
+        inputType === "touch" ? TOUCH_SCRUB_SPEED : WHEEL_SCRUB_SPEED;
+
+      console.log(speed)  
+
+      const delta = direction === "forward" ? speed : -speed;
       const newTarget = targetTimestampRef.current + delta;
 
-      // Clamp the new target between 0 and 1 to prevent going out of bounds
       targetTimestampRef.current = Math.max(0, Math.min(1, newTarget));
     },
-    [isActive] // Dependency array ensures the function has the current `isActive` state
-  );  
+    [isActive]
+  );
 
   const currentFrame = getCurrentFrame(currentTimestamp);
   const totalMoves = movesRef.current.length;
@@ -898,7 +905,7 @@ export function useTimelineAnimation({
     stopTimeline,
     resetTimeline,
     jumpToTimestamp,
-    scrubTimeline, 
+    scrubTimeline,
     currentTimestamp,
     targetTimestamp: targetTimestampRef.current,
     frames,

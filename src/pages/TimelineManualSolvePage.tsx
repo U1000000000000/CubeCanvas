@@ -67,9 +67,10 @@ export function TimelineManualSolvePage() {
 
   const [particlesVisible, setParticlesVisible] = useState(true);
 
-  const [scrollDirection, setScrollDirection] = useState<
-    "forward" | "reverse" | "paused"
-  >("paused");
+  const [scrollInfo, setScrollInfo] = useState({
+    direction: "paused" as "forward" | "reverse" | "paused",
+    type: null as "wheel" | "touch" | null,
+  });
   const scrollTimeoutRef = useRef<NodeJS.Timeout>();
   const instructionTimeoutRef = useRef<NodeJS.Timeout>();
   const touchStartY = useRef<number | null>(null);
@@ -77,12 +78,13 @@ export function TimelineManualSolvePage() {
   useEffect(() => {
     if (
       timelineState.isActive &&
-      scrollDirection !== "paused" &&
+      scrollInfo.direction !== "paused" &&
+      scrollInfo.type && // Ensure we have an input type
       scrubTimeline
     ) {
-      scrubTimeline(scrollDirection);
+      scrubTimeline(scrollInfo.direction, scrollInfo.type);
     }
-  }, [scrollDirection, timelineState.isActive, scrubTimeline]);
+  }, [scrollInfo, timelineState.isActive, scrubTimeline]);
 
   // Show instructions when timeline starts
   useEffect(() => {
@@ -117,13 +119,13 @@ export function TimelineManualSolvePage() {
 
   // Hide instructions when user starts scrolling
   useEffect(() => {
-    if (showInstructions && scrollDirection !== "paused") {
+    if (showInstructions && scrollInfo.direction !== "paused") {
       setShowInstructions(false);
       if (instructionTimeoutRef.current) {
         clearTimeout(instructionTimeoutRef.current);
       }
     }
-  }, [showInstructions, scrollDirection]);
+  }, [showInstructions, scrollInfo.direction]);
 
   // Keyboard event listener for arrow keys
   useEffect(() => {
@@ -134,7 +136,7 @@ export function TimelineManualSolvePage() {
         if (timelineState.isActive) {
           // Control timeline during solving - simulate scrolling behavior
           const direction = e.code === "ArrowDown" ? "forward" : "reverse";
-          setScrollDirection(direction);
+          setScrollInfo({ direction, type: "wheel" });
 
           // Clear existing timeout
           if (scrollTimeoutRef.current) {
@@ -143,7 +145,7 @@ export function TimelineManualSolvePage() {
 
           // Stop scrolling after timeout (same as wheel scroll behavior)
           scrollTimeoutRef.current = setTimeout(() => {
-            setScrollDirection("paused");
+            setScrollInfo({ direction: "paused", type: null });
           }, 500);
         } else if (
           isComplete &&
@@ -165,7 +167,7 @@ export function TimelineManualSolvePage() {
         timelineState.isActive
       ) {
         // Stop timeline movement on key release (similar to stopping scroll)
-        setScrollDirection("paused");
+        setScrollInfo({ direction: "paused", type: null });
         if (scrollTimeoutRef.current) {
           clearTimeout(scrollTimeoutRef.current);
         }
@@ -200,7 +202,7 @@ export function TimelineManualSolvePage() {
 
         // Determine scroll direction based on deltaY
         const direction = e.deltaY > 0 ? "forward" : "reverse";
-        setScrollDirection(direction);
+        setScrollInfo({ direction, type: "wheel" });
 
         // Clear existing timeout
         if (scrollTimeoutRef.current) {
@@ -209,7 +211,7 @@ export function TimelineManualSolvePage() {
 
         // 🔥 CRITICAL FIX: Longer timeout to keep animation running
         scrollTimeoutRef.current = setTimeout(() => {
-          setScrollDirection("paused");
+          setScrollInfo({ direction: "paused", type: null });
         }, 500); // Increased from 150ms to 500ms
       }
     };
@@ -263,7 +265,7 @@ export function TimelineManualSolvePage() {
         e.preventDefault();
 
         const direction = deltaY > 0 ? "reverse" : "forward";
-        setScrollDirection(direction);
+        setScrollInfo({ direction, type: "touch" });
 
         touchStartY.current = currentY;
 
@@ -272,7 +274,7 @@ export function TimelineManualSolvePage() {
         }
 
         scrollTimeoutRef.current = setTimeout(() => {
-          setScrollDirection("paused");
+          setScrollInfo({ direction: "paused", type: null });
         }, 300);
       }
     };
@@ -280,7 +282,7 @@ export function TimelineManualSolvePage() {
     const handleTouchEnd = () => {
       // When the user lifts their finger, reset the start position and pause
       touchStartY.current = null;
-      setScrollDirection("paused");
+      setScrollInfo({ direction: "paused", type: null });
       if (scrollTimeoutRef.current) {
         clearTimeout(scrollTimeoutRef.current);
       }
@@ -307,9 +309,9 @@ export function TimelineManualSolvePage() {
   // 🔥 DEBUG: Log scroll direction changes
   useEffect(() => {
     if (timelineState.isActive) {
-      console.log("🎬 Scroll Direction:", scrollDirection);
+      console.log("🎬 Scroll Direction:", scrollInfo.direction);
     }
-  }, [scrollDirection, timelineState.isActive]);
+  }, [scrollInfo.direction, timelineState.isActive]);
 
   useEffect(() => {
     if (!cubies.length || isAnimating || timelineState.isActive) return;
@@ -610,14 +612,14 @@ export function TimelineManualSolvePage() {
   const handleStopSolving = () => {
     stopTimeline();
     setSolution("");
-    setScrollDirection("paused");
+    setScrollInfo({ direction: "paused", type: null });
   };
 
   const handleFullReset = () => {
     stopTimeline();
     resetTimeline();
     setSolution("");
-    setScrollDirection("paused");
+    setScrollInfo({ direction: "paused", type: null });
     useManualCubeStore.getState().reset();
   };
 
@@ -633,6 +635,7 @@ export function TimelineManualSolvePage() {
   const currentFrame = timelineState.currentFrame;
   const rotationState = currentFrame?.rotationState;
 
+
   return (
     <div
       className="w-screen h-screen relative flex items-center justify-center overflow-hidden"
@@ -642,7 +645,7 @@ export function TimelineManualSolvePage() {
         <BackgroundParticles
           isActive={timelineState.isActive}
           particleCount={220}
-          scrollDirection={scrollDirection}
+          scrollDirection={scrollInfo.direction}
           minDistance={30}
         />
       )}
